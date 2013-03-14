@@ -1,0 +1,30 @@
+{
+	"id": "layer",
+	"description": "Extracted layered data from a source layout (e.g. PSD)",
+
+	"type": "object",
+	"properties": {
+		"id": { "type": "string" },
+		"name": { "type": "string" },
+		"bbox": {
+			"type": "object",
+			"properties": {
+				"description": "These are absolute units, relative to root",
+				"x": { "type": "number" },
+				"y": { "type": "number" },
+				"w": { "type": "number" },
+				"h": { "type": "number" }
+			}
+		}
+		"text": {
+			"type": "object",
+			"properties": {
+				"value": { "type": "string" }
+			}
+		}
+		"children": {
+			"type": "array",
+			"items": { "$ref": "sourceLayer" }
+		}
+	}
+}
