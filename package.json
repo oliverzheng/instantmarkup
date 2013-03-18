@@ -1,0 +1,19 @@
+{
+	"name": "instantmarkup",
+	"description": "Turn PSDs into markup automagically",
+	"version": "0.0.0",
+	"private": true,
+	"engines": {
+		"node": "0.8.x",
+		"npm": "1.1.x"
+	},
+	"devDependencies": {
+		"typescript": "0.8.x",
+		"ntspm": "0.0.x",
+		"nodeunit": "0.7.x"
+	},
+	"dependencies": {
+		"jsonschema": "0.1.x",
+		"psd": "https://github.com/zx2c4/psd.js/tarball/master"
+	}
+}
