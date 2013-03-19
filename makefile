@@ -1,6 +1,7 @@
 OUTPUT_DIR=bin
 
 SOURCES=\
+	src/extract/interfaces.ts \
 	src/extract/psd.ts \
 	src/extract/test/test_psd.ts \
 	src/test-util.ts \
@@ -17,10 +18,10 @@ $(OUTPUT_DIR): $(SOURCES)
 	@$(CC) --declaration --out $(OUTPUT_DIR) $(SOURCES)
 	@echo ' Done'
 
-test: $(OUTPUT_DIR)
+test:
 	@$(TEST) $(shell find $(OUTPUT_DIR) -ipath */test/*.js)
 
-debug: $(OUTPUT_DIR)
+debug:
 	@node debug $(TEST) $(shell find $(OUTPUT_DIR) -ipath *test*.js)
 
 clean:

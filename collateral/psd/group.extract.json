@@ -1,0 +1,55 @@
+{
+	"id": "group.psd",
+	"name": "group.psd",
+	"bbox": {
+		"w": 230,
+		"h": 100
+	},
+	"children": [
+		{
+			"id": "Group 1",
+			"name": "Group 1",
+			"bbox": {
+				"x": 10,
+				"y": 21,
+				"w": 140,
+				"h": 59
+			},
+			"children": [
+				{
+					"id": "Test",
+					"name": "Test",
+					"bbox": {
+						"x": 10,
+						"y": 21,
+						"w": 24,
+						"h": 10
+					},
+					"text": {
+						"value": "Herp Derp"
+					}
+				},
+				{
+					"id": "Layer 1",
+					"name": "Layer 1",
+					"bbox": {
+						"x": 50,
+						"y": 50,
+						"w": 100,
+						"h": 30
+					}
+				}
+			]
+		},
+		{
+			"id": "Background",
+			"name": "Background",
+			"bbox": {
+				"x": 0,
+				"y": 0,
+				"w": 230,
+				"h": 100
+			}
+		}
+	]
+}

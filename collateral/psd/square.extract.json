@@ -1,2 +1,30 @@
 {
+	"id": "square.psd",
+	"name": "square.psd",
+	"bbox": {
+		"w": 200,
+		"h": 200
+	},
+	"children": [
+		{
+			"id": "Layer 1",
+			"name": "Layer 1",
+			"bbox": {
+				"x": 50,
+				"y": 50,
+				"w": 100,
+				"h": 100
+			}
+		},
+		{
+			"id": "Background",
+			"name": "Background",
+			"bbox": {
+				"x": 0,
+				"y": 0,
+				"w": 200,
+				"h": 200
+			}
+		}
+	]
 }
