@@ -13,15 +13,16 @@ TEST=node_modules/nodeunit/bin/nodeunit
 build: $(OUTPUT_DIR)
 
 $(OUTPUT_DIR): $(SOURCES)
+	@rm -rf $(OUTPUT_DIR)
 	@mkdir -p $(OUTPUT_DIR)
 	@echo -n Compiling...
 	@$(CC) --declaration --out $(OUTPUT_DIR) $(SOURCES)
 	@echo ' Done'
 
-test:
+test: build
 	@$(TEST) $(shell find $(OUTPUT_DIR) -ipath */test/*.js)
 
-debug:
+debug: build
 	@node debug $(TEST) $(shell find $(OUTPUT_DIR) -ipath *test*.js)
 
 clean:
