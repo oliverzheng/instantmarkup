@@ -4,27 +4,28 @@
 
 	"type": "object",
 	"properties": {
-		"id": { "type": "string" },
-		"name": { "type": "string" },
+		"id": { "type": "string", "required": true },
+		"name": { "type": "string", "required": true },
 		"bbox": {
 			"type": "object",
+			"required": true,
 			"properties": {
 				"description": "These are absolute units, relative to root",
 				"x": { "type": "number" },
 				"y": { "type": "number" },
-				"w": { "type": "number" },
-				"h": { "type": "number" }
+				"w": { "type": "number", "required": true },
+				"h": { "type": "number", "required": true }
 			}
-		}
+		},
 		"text": {
 			"type": "object",
 			"properties": {
-				"value": { "type": "string" }
+				"value": { "type": "string", "required": true }
 			}
-		}
+		},
 		"children": {
 			"type": "array",
-			"items": { "$ref": "sourceLayer" }
+			"items": { "$ref": "layer" }
 		}
 	}
 }
