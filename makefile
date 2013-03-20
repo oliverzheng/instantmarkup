@@ -3,8 +3,8 @@ OUTPUT_DIR=bin
 SOURCES=\
 	src/extract/interfaces.ts \
 	src/extract/psd.ts \
-	src/extract/test/test_psd.ts \
-	src/test-util.ts \
+	src/extract/test/testPsd.ts \
+	src/testUtil.ts \
 	src/main.ts \
 
 CC=node_modules/typescript/bin/tsc
@@ -25,7 +25,10 @@ test: build
 debug: build
 	@node debug $(TEST) $(shell find $(OUTPUT_DIR) -ipath *test*.js)
 
+typings:
+	node_modules/ntspm/bin/ntspm
+
 clean:
 	rm -rf $(OUTPUT_DIR)
 
-.PHONY: build test clean
+.PHONY: build test debug typings clean

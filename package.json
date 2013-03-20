@@ -9,11 +9,11 @@
 	},
 	"devDependencies": {
 		"typescript": "0.8.x",
-		"ntspm": "0.0.x",
+		"ntspm": "git://github.com/oliverzheng/ntspm",
 		"nodeunit": "0.7.x"
 	},
 	"dependencies": {
 		"jsonschema": "0.1.x",
-		"psd": "https://github.com/zx2c4/psd.js/tarball/master"
+		"psd": "git://github.com/oliverzheng/psd.js"
 	}
 }

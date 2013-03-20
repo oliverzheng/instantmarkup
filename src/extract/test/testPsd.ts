@@ -1,7 +1,5 @@
-/// <reference path='../../../_test_typings.d.ts' />
-
 import fs = module('fs');
-import testutil = module('../../test-util');
+import testutil = module('../../testUtil');
 import psd = module('../psd');
 var Validator = require('jsonschema').Validator;
 
