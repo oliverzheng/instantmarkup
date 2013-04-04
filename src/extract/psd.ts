@@ -21,7 +21,6 @@ function exportPsdLayers(psdLayers): interfaces.Layer[] {
 	var layers: interfaces.Layer[] = [];
 	var endLoop = false;
 
-	debugger;
 	while (psdLayers.length > 0 && !endLoop) {
 		var psdLayer = psdLayers.shift();
 		var layer: interfaces.Layer = null;
