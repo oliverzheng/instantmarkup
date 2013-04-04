@@ -14,7 +14,7 @@ SOURCES=\
 CC=node_modules/typescript/bin/tsc
 TEST=node_modules/nodeunit/bin/nodeunit
 
-build: $(OUTPUT_DIR)
+build: deps $(OUTPUT_DIR)
 
 # There is no dependency detection yet. Each incremental build is a full build.
 $(OUTPUT_DIR): $(SOURCES) makefile
@@ -30,10 +30,16 @@ test: build
 debug: build
 	@node debug $(TEST) $(shell find $(OUTPUT_DIR) -ipath */test/test*.js)
 
-typings:
+deps: node_modules
+
+node_modules: package.json
+	npm install
 	node_modules/ntspm/bin/ntspm
 
 clean:
 	rm -rf $(OUTPUT_DIR)
 
-.PHONY: build test debug typings clean
+cleanall: clean
+	rm -rf _typings.d.ts typings node_modules
+
+.PHONY: build test debug deps clean cleanall
