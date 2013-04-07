@@ -6,8 +6,11 @@ SOURCES=\
 	src/extract/util.ts \
 	src/extract/test/testPsd.ts \
 	src/intent/interfaces.ts \
+	src/intent/layout.ts \
+	src/intent/tree.ts \
 	src/intent/util.ts \
-	src/intent/test/testUtil.ts \
+	src/intent/test/testLayout.ts \
+	src/intent/test/testTree.ts \
 	src/testUtil.ts \
 	src/main.ts \
 

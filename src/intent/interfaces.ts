@@ -1,18 +1,62 @@
+/**
+ * Units of measurement for boxes and their children.
+ */
 export enum LengthUnit {
-	/** Be as small as possible. It must fit children. */
-	SHRINK,
-
-	/** Be as big as possible. It will take as much free space as it can. */
-	EXPAND,
-
-	/** Absolute # of pixels. */
+	/**
+	 * Absolute # of pixels.
+	 *
+	 * Setting this never changes the length.
+	 */
 	PIXELS,
 
-	/** Percentage of the parent's length. */
+	/**
+	 * Percentage of the parent's length.
+	 *
+	 * This unit depends on the parent's computed length. It does not change the
+	 * parent's length (or other children's lengths if they depend on the
+	 * parent).
+	 */
 	PERCENT,
 
-	/** How many parts out of total number of parts of parent's length. */
+	/**
+	 * How many parts out of a parent's free space this takes.
+	 *
+	 * Besides pixel and percent based children, the free space left over is
+	 * divided into parts - as many as the sum of all part based children.
+	 *
+	 * E.g. A child requesting 2 parts and a child requesting 3 parts from
+	 * a parent that contains another child requesting 50% will each get 20% and
+	 * 30%.
+	 *
+	 * This unit depends on the parent's computed length and does not change it.
+	 */
 	PARTS,
+
+	/**
+	 * Be as big as possible.
+	 *
+	 * If the parent has space left over after pixel, percent, and parts based
+	 * children, the remaining space is left to expansive children. Each one has
+	 * "1 part" in the remaining space to divvy up.
+	 *
+	 * This unit depends on the parent's computed length and does not change it.
+	 */
+	EXPAND,
+
+	/**
+	 * Be as small as possible. It must fit all children.
+	 *
+	 * The length is dependent on children lengths. When it contains lengths
+	 * that depend on parent lengths, the parent of this length is used.
+	 *
+	 * E.g. In the hierarchy:
+	 * - 100px
+	 *   - shrink
+	 *     - 50%
+	 *
+	 * The 50% is calculated on 100px.
+	 */
+	SHRINK,
 }
 
 
@@ -30,6 +74,8 @@ export var shrink: Length = {
 export var expand: Length = {
 	unit: LengthUnit.EXPAND
 };
+
+export var defaultLength = shrink;
 
 export function px(value: number): Length {
 	return {
@@ -99,14 +145,6 @@ export enum Wrap {
 }
 
 
-export interface Margin {
-	l?: Length;
-	r?: Length;
-	t?: Length;
-	b?: Length;
-}
-
-
 /**
  * Rectangle measured in absolute pixels.
  */
@@ -116,6 +154,7 @@ export interface Rect {
 	w: number;
 	h: number;
 }
+
 
 export interface Box {
 	/** Must be unique among its tree. */
@@ -127,21 +166,25 @@ export interface Box {
 	parent?: Box;
 
 	/** Bounding box of this collateral. */
-	sizing?: {
-		x?: Length;
-		y?: Length;
-	};
+	w?: Length;
+	h?: Length;
 
 	/**
-	 * Margin overlap; if two children have the same margin, the distance
-	 * between them is that margin.
+	 * Absolute position from the parent. These are taken out of the layout
+	 * loop.
+	 *
+	 * Only pixels and percent can be used, since children do not interact with
+	 * each other.
 	 */
-	margin?: Margin;
-
-	wrap?: {
-		x?: Wrap;
-		y?: Wrap;
+	absolute?: {
+		l?: Length;
+		r?: Length;
+		t?: Length;
+		b?: Length;
 	};
+
+	xWrap?: Wrap;
+	yWrap?: Wrap;
 
 	/**
 	 * A string of text to use as child. If used, children must be null.
