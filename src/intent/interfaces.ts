@@ -101,24 +101,26 @@ export function prt(value: number): Length {
 
 /** Direction of children to stack. */
 export enum Direction {
+	/** Children are positioned relative to parent's top left. */
+	NONE,
+
 	/** Stack children horizontally. */
 	HORIZONTAL,
 
 	/** Stack children vertically. */
 	VERTICAL,
-
-	/** Children are positioned relative to parent's top left. */
-	NONE,
 }
+
+export var defaultDirection = Direction.NONE;
 
 
 /**
  * How children should be aligned for a given direction.
  *
  * This works by inserting one or more invisible children among the children and
- * setting its length to expand. Lengths of the real children (widths, margins)
- * have priority over these invisible children's; that is, these would only be
- * effective if there is free space left.
+ * setting its length to expand. Lengths of the real children, have priority
+ * over these invisible children's; that is, these would only be effective if
+ * there is free space left.
  */
 export enum Alignment {
 	/** Insert an invisible child at the end. */
@@ -129,20 +131,9 @@ export enum Alignment {
 
 	/** Insert one invisible child at the beginning. */
 	FAR,
-
-	/** Insert one invisible child between each child. */
-	JUSTIFIED,
 }
 
-
-/** Wrapping of children when they exceed the parent's bounding box. */
-export enum Wrap {
-	/** Wrap children to the next line. */
-	WRAP,
-
-	/** Children extend beyond the parent's bounding box. */
-	NOWRAP,
-}
+export var defaultAlignment = Alignment.NEAR;
 
 
 /**
@@ -183,8 +174,22 @@ export interface Box {
 		b?: Length;
 	};
 
-	xWrap?: Wrap;
-	yWrap?: Wrap;
+	/** How children should flow. */
+	direction?: Direction;
+
+	/**
+	 * Alignment in the direction of children.
+	 *
+	 * Near for horizontal is left; near for vertical is top.
+	 */
+	alignment?: Alignment;
+
+	/**
+	 * Alignment perpendicular to the direction of children.
+	 *
+	 * Near for horizontal is top; near for vertical is left.
+	 */
+	crossAlignment?: Alignment;
 
 	/**
 	 * A string of text to use as child. If used, children must be null.
@@ -193,13 +198,6 @@ export interface Box {
 	 */
 	text?: {
 		value: string;
-	};
-
-	direction?: Direction;
-
-	alignment?: {
-		x?: Alignment;
-		y?: Alignment;
 	};
 
 	children?: Box[];

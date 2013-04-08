@@ -15,6 +15,35 @@ function lengthFromDirection(box: inf.Box, dir: inf.Direction): inf.Length {
 }
 
 /**
+ * Get a pair of beginning and end absolute positions of a box in a given
+ * direction.
+ */
+function absoluteFromDirection(box: inf.Box, dir: inf.Direction): inf.Length[] {
+	if (!box.absolute)
+		return null;
+
+	if (dir === inf.Direction.HORIZONTAL)
+		return [box.absolute.l, box.absolute.r];
+	else if (dir === inf.Direction.VERTICAL)
+		return [box.absolute.t, box.absolute.b];
+
+	throw 'Direction must be horizontal or vertical';
+}
+
+/**
+ * Get a computed child length relative to a computed parent length. The length
+ * must be a fixed length, e.g. pixels or percent.
+ */
+function compFixed(parentComp: number, childLength: inf.Length): number {
+	if (childLength.unit === inf.LengthUnit.PIXELS)
+		return childLength.value;
+	else if (childLength.unit === inf.LengthUnit.PERCENT)
+		return parentComp * childLength.value;
+	else
+		throw 'Child length must be pixels or percent';
+}
+
+/**
  * If the box participates in layout.
  */
 function inLayoutLoop(box: inf.Box): bool {
@@ -133,6 +162,17 @@ export class Layout {
 	}
 
 	/**
+	 * Width and height.
+	 */
+	compW(box: inf.Box): number {
+		return this.compLength(box, inf.Direction.HORIZONTAL);
+	}
+
+	compH(box: inf.Box): number {
+		return this.compLength(box, inf.Direction.VERTICAL);
+	}
+
+	/**
 	 * Calculate the computed length for a given direction.
 	 */
 	compLength(box: inf.Box, dir: inf.Direction): number {
@@ -146,7 +186,7 @@ export class Layout {
 		var parent = box.parent;
 		while (parent &&
 			   util.lengthEquals(lengthFromDirection(parent, dir), inf.shrink))
-			parent = box.parent;
+			parent = parent.parent;
 
 		var parentComp;
 		if (parent)
@@ -160,41 +200,168 @@ export class Layout {
 		if (length.unit === inf.LengthUnit.PERCENT)
 			return parentComp * length.value;
 
-		/* Parts require existing fixed siblings to be computed */
-		var fixedChildren = this.compFixedChildren(parent, dir);
-		var free = Math.max(parentComp - fixedChildren, 0);
+		/* If we are computing the cross direction length, don't use children */
+		var parentDir = parent.direction || inf.defaultDirection;
+		var useOtherChildren = (
+			parentDir === inf.Direction.NONE ||
+			parentDir === dir
+		);
 
-		var parts = getParts(parent, dir);
-		if (length.unit === inf.LengthUnit.PARTS)
-			return parts ? (free * length.value / parts) : 0;
+		var free: number;
+		var parts: number;
+		if (useOtherChildren) {
+			/* Parts require existing fixed siblings to be computed */
+			var fixedChildren = this.compFixedChildren(parent, dir);
+			free = Math.max(parentComp - fixedChildren, 0);
+
+			parts = getParts(parent, dir);
+
+		} else {
+			free = parentComp;
+		}
+
+		if (length.unit === inf.LengthUnit.PARTS) {
+			if (useOtherChildren)
+				return parts ? (free * length.value / parts) : 0;
+			else
+				return free;
+		}
+
+		var abs = absoluteFromDirection(box, dir);
+		if (abs && abs[0] && abs[1]) {
+			var near = compFixed(parentComp, abs[0]);
+			var far = compFixed(parentComp, abs[1]);
+			/* Prevent overlap */
+			return Math.max(parentComp - far - near, 0);
+		}
 
 		if (length.unit === inf.LengthUnit.EXPAND) {
 			/* Parts have priority over expand. If there are any parts, no room
 			 * is left for expand. */
-			if (parts > 0)
-				return 0;
+			if (useOtherChildren) {
+				if (parts > 0)
+					return 0;
 
-			var expands = effectiveChildren(parent, dir,
-											inf.LengthUnit.EXPAND).length;
-			return free / expands;
+				var expands = effectiveChildren(parent, dir,
+												inf.LengthUnit.EXPAND).length;
+				return free / expands;
+
+			} else {
+				return free;
+			}
 		}
 
 		if (length.unit === inf.LengthUnit.SHRINK) {
 			var sum = 0;
-			effectiveChildren(box, dir).forEach((child) => {
-				sum += this.compLength(child, dir);
-			});
+			if (useOtherChildren)
+				effectiveChildren(box, dir).forEach((child) => {
+					sum += this.compLength(child, dir);
+				});
 			return sum;
 		}
 	}
 
 	/**
-	 * Width and height.
+	 * X and Y are relative to parent.
 	 */
-	compW(box: inf.Box): number {
-		return this.compLength(box, inf.Direction.HORIZONTAL);
+	compX(box: inf.Box): number {
+		return this.compPosition(box, inf.Direction.HORIZONTAL);
 	}
-	compH(box: inf.Box): number {
-		return this.compLength(box, inf.Direction.VERTICAL);
+
+	compY(box: inf.Box): number {
+		return this.compPosition(box, inf.Direction.VERTICAL);
+	}
+
+	compPosition(box: inf.Box, dir: inf.Direction): number {
+		var parent = box.parent;
+		if (!parent)
+			return 0;
+
+		var parentComp = this.compLength(parent, dir);
+		var boxComp = this.compLength(box, dir);
+
+		var abs = absoluteFromDirection(box, dir);
+		if (abs) {
+			if (abs[0])
+				return compFixed(parentComp, abs[0]);
+			else if (abs[1])
+				return parentComp - compFixed(parentComp, abs[1]) - boxComp;
+			else
+				throw 'Absolute must specify at least one of near or far';
+		}
+
+		var parentDir = parent.direction || inf.defaultDirection;
+
+		/* All children are layered on top of each other */
+		if (parentDir === inf.Direction.NONE)
+			return 0;
+
+		var childrenComps: number[] = [];
+		var childIndex: number;
+		var alignment: inf.Alignment;
+
+		if (parentDir === dir) {
+			alignment = parent.alignment;
+
+			/* No need for effective children; shrink is first-class citizen */
+			var siblings = (parent.children || []).filter(inLayoutLoop);
+			childrenComps = siblings.map((child, i) => {
+				if (child === box)
+					childIndex = i;
+				return this.compLength(child, dir);
+			});
+
+		} else {
+			/* Perpendicular to our direction */
+			alignment = parent.crossAlignment;
+
+			/* Treat this as if we only have ourself in the direction */
+			childrenComps = [boxComp];
+			childIndex = 0;
+		}
+		alignment = alignment || inf.defaultAlignment;
+
+		if (alignment === inf.Alignment.NEAR) {
+			var sum = 0;
+			childrenComps.slice(0, childIndex).forEach((childComp) => {
+				sum += childComp;
+			});
+			return sum;
+
+		} else if (alignment === inf.Alignment.FAR) {
+			var sum = 0;
+			childrenComps.slice(childIndex).forEach((childComp) => {
+				sum += childComp;
+			});
+			return parentComp - sum;
+
+		} else if (alignment === inf.Alignment.CENTER) {
+			var sum = 0;
+			var sumBeforeChild = 0;
+			childrenComps.forEach((childComp, i) => {
+				sum += childComp;
+				if (i < childIndex)
+					sumBeforeChild += childComp;
+			});
+			return (parentComp - sum) / 2 + sumBeforeChild;
+		}
+
+		throw 'New alignment added?';
+	}
+
+	/**
+	 * These are relative to the root box.
+	 */
+	compXAbs(box: inf.Box): number {
+		var x;
+		for (x = 0; box != null; box = box.parent)
+			x += this.compX(box);
+		return x;
+	}
+	compYAbs(box: inf.Box): number {
+		var y;
+		for (y = 0; box != null; box = box.parent)
+			y += this.compY(box);
+		return y;
 	}
 }
