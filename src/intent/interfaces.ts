@@ -202,3 +202,11 @@ export interface Box {
 
 	children?: Box[];
 }
+
+
+/** An iterator to get boxes. If returns null, iteration has stopped. */
+export interface BoxIter {
+	(): Box;
+	first: (condition: (box: Box) => bool) => Box;
+	forEach: (callback: (box: Box) => any) => void;
+}

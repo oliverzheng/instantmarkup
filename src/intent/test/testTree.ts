@@ -70,17 +70,6 @@ export function testIndexOfChild(test) {
 	test.done();
 }
 
-export function testBoxForEach(test) {
-	var expectedIds = ['child1', 'parent1', 'child2', 'parent2', 'root'];
-	var actualIds: string[] = [];
-	tree.boxForEach(this.root, (box) => {
-		actualIds.push(box.id);
-	});
-	testUtil.equals(test, expectedIds, actualIds);
-
-	test.done();
-}
-
 export function testGetBoxById(test) {
 	var ids = ['child1', 'parent1'];
 	for (var i = 0; i < ids.length; ++i) {
@@ -90,16 +79,6 @@ export function testGetBoxById(test) {
 	}
 
 	test.equal(tree.getBoxById(this.root, 'derp'), null);
-
-	test.throws(() => {
-		var root = {
-			children: [
-				{ id: 'test' },
-				{ id: 'test' },
-			]
-		};
-		tree.getBoxById(root, 'test');
-	});
 
 	test.done();
 }

@@ -1,6 +1,7 @@
 /// <reference path="../../_typings.d.ts" />
 
 import inf = module('./interfaces')
+import iter = module('./iter');
 
 /**
  * Recalculate parent relationships for all children.
@@ -29,32 +30,12 @@ export function indexOfChild(box: inf.Box): number {
 }
 
 /**
- * Iterate boxes by depth-first
- */
-export function boxForEach(box: inf.Box, callback: (box: inf.Box) => void): void {
-	if (box.children) {
-		box.children.forEach((child) => {
-			boxForEach(child, callback);
-		});
-	}
-
-	callback(box);
-}
-
-/**
  * Find a descendant box by id.
  */
 export function getBoxById(root: inf.Box, id: string): inf.Box {
-	var boxes: inf.Box[] = [];
-	boxForEach(root, (box) => {
-		if (box.id === id)
-			boxes.push(box);
+	return iter.depthFirst(root).first((box) => {
+		return (box.id === id);
 	});
-
-	if (boxes.length > 1)
-		throw 'Multiple boxes have the same id';
-
-	return boxes[0];
 }
 
 /**

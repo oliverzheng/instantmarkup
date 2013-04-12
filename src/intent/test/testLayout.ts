@@ -1,6 +1,7 @@
 /// <reference path="../../../_typings.d.ts" />
 
 import inf = module('../interfaces');
+import iter = module('../iter');
 import tree = module('../tree');
 import layout = module('../layout');
 import testUtil = module('../../testUtil');
@@ -433,7 +434,7 @@ export var testCompPosition = {
 	},
 
 	directionHoriz: function (test) {
-		tree.boxForEach(this.root, function(box) {
+		iter.depthFirst(this.root).forEach(function(box) {
 			box.direction = inf.Direction.HORIZONTAL;
 		});
 
@@ -473,7 +474,7 @@ export var testCompPosition = {
 	},
 
 	directionHorizAlignCenter: function(test) {
-		tree.boxForEach(this.root, function(box) {
+		iter.depthFirst(this.root).forEach(function(box) {
 			box.direction = inf.Direction.HORIZONTAL;
 			box.alignment = inf.Alignment.CENTER;
 		});
@@ -514,7 +515,7 @@ export var testCompPosition = {
 	},
 
 	directionHorizAlignRight: function(test) {
-		tree.boxForEach(this.root, function(box) {
+		iter.depthFirst(this.root).forEach(function(box) {
 			box.direction = inf.Direction.HORIZONTAL;
 			box.alignment = inf.Alignment.FAR;
 		});
@@ -580,7 +581,7 @@ export function testCompPositionCross(test) {
 	tree.refreshParents(root);
 	var l = new layout.Layout(root);
 
-	tree.boxForEach(root, function(box) {
+	iter.depthFirst(root).forEach(function(box) {
 		box.direction = inf.Direction.HORIZONTAL;
 	});
 
@@ -595,7 +596,7 @@ export function testCompPositionCross(test) {
 	test.strictEqual(l.compY(root.children[4]), 0);
 	test.strictEqual(l.compY(root.children[5]), 0);
 
-	tree.boxForEach(root, function(box) {
+	iter.depthFirst(root).forEach(function(box) {
 		box.crossAlignment = inf.Alignment.CENTER;
 	});
 	test.strictEqual(l.compY(root), 0);
@@ -608,7 +609,7 @@ export function testCompPositionCross(test) {
 	test.strictEqual(l.compY(root.children[4]), 0);
 	test.strictEqual(l.compY(root.children[5]), 50);
 
-	tree.boxForEach(root, function(box) {
+	iter.depthFirst(root).forEach(function(box) {
 		box.crossAlignment = inf.Alignment.FAR;
 	});
 	test.strictEqual(l.compY(root), 0);
