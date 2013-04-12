@@ -1,7 +1,7 @@
 /// <reference path="../../../_typings.d.ts" />
 
 import inf = module('../interfaces');
-import iter = module('../iter');
+import gen = module('../generator');
 import tree = module('../tree');
 
 export function testDepthFirst(test) {
@@ -29,7 +29,7 @@ export function testDepthFirst(test) {
 	tree.refreshParents(root);
 
 	var expectedIds = ['child1', 'parent1', 'child2', 'parent2', 'root'];
-	var it = iter.depthFirst(root);
+	var it = gen.depthFirst(root);
 	expectedIds.forEach((id) => {
 		var box = it();
 		test.strictEqual(box.id, id);

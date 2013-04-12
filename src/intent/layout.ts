@@ -113,7 +113,7 @@ export class Layout {
 	private w: number;
 	private h: number;
 
-	private root: inf.Box;
+	root: inf.Box;
 
 	constructor(root: inf.Box, w: number = null, h: number = null) {
 		this.root = root;

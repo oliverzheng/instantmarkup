@@ -1,7 +1,7 @@
 /// <reference path="../../_typings.d.ts" />
 
 import inf = module('./interfaces')
-import iter = module('./iter');
+import gen = module('./generator');
 
 /**
  * Recalculate parent relationships for all children.
@@ -33,7 +33,7 @@ export function indexOfChild(box: inf.Box): number {
  * Find a descendant box by id.
  */
 export function getBoxById(root: inf.Box, id: string): inf.Box {
-	return iter.depthFirst(root).first((box) => {
+	return gen.depthFirst(root).first((box) => {
 		return (box.id === id);
 	});
 }
