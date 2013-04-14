@@ -13,11 +13,13 @@ SOURCES=\
 	src/intent/generator.ts \
 	src/intent/iterator.ts \
 	src/intent/layout.ts \
+	src/intent/search.ts \
 	src/intent/tree.ts \
 	src/intent/util.ts \
 	src/intent/test/testGenerator.ts \
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
+	src/intent/test/testSearch.ts \
 	src/intent/test/testTree.ts \
 	src/intent/test/testUtil.ts \
 	src/test/testCoverage.ts \

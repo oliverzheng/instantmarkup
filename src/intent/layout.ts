@@ -351,15 +351,30 @@ export class Layout {
 	 * These are relative to the root box.
 	 */
 	compXAbs(box: inf.Box): number {
-		var x;
-		for (x = 0; box != null; box = box.parent)
-			x += this.compX(box);
-		return x;
+		return this.compPositionAbs(box, inf.Direction.HORIZONTAL);
 	}
 	compYAbs(box: inf.Box): number {
-		var y;
-		for (y = 0; box != null; box = box.parent)
-			y += this.compY(box);
-		return y;
+		return this.compPositionAbs(box, inf.Direction.VERTICAL);
+	}
+
+	compPositionAbs(box: inf.Box, dir: inf.Direction): number {
+		var pos;
+		for (pos = 0; box != null; box = box.parent)
+			pos += this.compPosition(box, dir);
+		return pos;
+	}
+
+	/** Utilities */
+
+	/**
+	 * @return A bounding rect that fits around the input box.
+	 */
+	getBoundingRect(box: inf.Box): inf.Rect {
+		return {
+			x: this.compXAbs(box),
+			y: this.compYAbs(box),
+			w: this.compW(box),
+			h: this.compH(box),
+		};
 	}
 }
