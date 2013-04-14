@@ -91,6 +91,8 @@ export function testOrphanBox(test) {
 	test.equal(child1.parent, null);
 	test.strictEqual(parent.children.length, 0);
 
+	test.equal(tree.orphanBox({}), null);
+
 	test.done();
 }
 
@@ -215,7 +217,7 @@ export function testReparentBefore3(test) {
 	test.done();
 }
 
-export function testReparentAfter(test) {
+export function testReparentBefore4(test) {
 	test.strictEqual(tree.reparent(this.child2, this.root), this.parent2);
 	testUtil.equals(test, getStructure(this.root), {
 		'root': <any[]>[
@@ -225,6 +227,46 @@ export function testReparentAfter(test) {
 			'child2',
 			'parent2'
 		]
+	});
+
+	test.done();
+}
+
+export function testReparentBefore5(test) {
+	test.strictEqual(tree.reparent(this.child1, this.child2), this.parent1);
+	testUtil.equals(test, getStructure(this.root), {
+		'root': <any[]>[
+			'parent1',
+			{'parent2': [
+				{'child2': [
+					'child1'
+				]}
+			]},
+		]
+	});
+
+	test.done();
+}
+
+export function testReparentAfter(test) {
+	test.strictEqual(tree.reparent(this.child2, this.parent1), this.parent2);
+	testUtil.equals(test, getStructure(this.root), {
+		'root': <any[]>[
+			{'parent1': [
+				'child1',
+				'child2',
+			]},
+			'parent2',
+		]
+	});
+
+	test.done();
+}
+
+
+export function testReparentOwnChild(test) {
+	test.throws(() => {
+		tree.reparent(this.parent1, this.child1);
 	});
 
 	test.done();

@@ -8,6 +8,7 @@ SOURCES=\
 	src/extract/psd.ts \
 	src/extract/util.ts \
 	src/extract/test/testPsd.ts \
+	src/extract/test/testUtil.ts \
 	src/intent/interfaces.ts \
 	src/intent/generator.ts \
 	src/intent/iterator.ts \
@@ -18,6 +19,7 @@ SOURCES=\
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
 	src/intent/test/testTree.ts \
+	src/intent/test/testUtil.ts \
 	src/test/testCoverage.ts \
 	src/testUtil.ts \
 	src/main.ts \

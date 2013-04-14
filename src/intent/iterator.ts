@@ -6,8 +6,8 @@ import inf = module('./interfaces')
 export interface BoxIter {
 	(): inf.Box;
 	toArray: () => inf.Box[];
-	first: (condition: (box: inf.Box) => bool) => inf.Box;
-	forEach: (callback: (box: inf.Box) => any) => void;
+	first: (condition?: (box: inf.Box) => bool) => inf.Box;
+	forEach: (callback: (box: inf.Box, i: number) => any) => void;
 	filter: (condition: (box: inf.Box) => bool) => BoxIter;
 }
 
@@ -25,7 +25,7 @@ export function makeIter(gen: () => inf.Box): BoxIter {
 		return first(iter, condition);
 	};
 
-	iter.forEach = (callback: (box: inf.Box) => any) => {
+	iter.forEach = (callback: (box: inf.Box, i: number) => any) => {
 		return forEach(iter, callback);
 	};
 
@@ -50,9 +50,9 @@ export function toArray(iter: BoxIter): inf.Box[] {
 /**
  * Returns the first box that matches a condition.
  */
-export function first(iter: BoxIter, condition: (box: inf.Box) => bool): inf.Box {
+export function first(iter: BoxIter, condition?: (box: inf.Box) => bool): inf.Box {
 	var box: inf.Box;
-	while ((box = iter()) && !condition(box));
+	while ((box = iter()) && condition && !condition(box));
 	return box;
 }
 
@@ -60,10 +60,11 @@ export function first(iter: BoxIter, condition: (box: inf.Box) => bool): inf.Box
  * Iterates through all boxes.
  */
 export function forEach(iter: BoxIter,
-						callback: (box: inf.Box) => any): void {
+						callback: (box: inf.Box, i: number) => any): void {
 	var box: inf.Box;
+	var i = 0;
 	while (box = iter())
-		callback(box);
+		callback(box, i++);
 }
 
 /**

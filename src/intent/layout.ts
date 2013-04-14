@@ -6,7 +6,7 @@ import util = module('./util');
 /**
  * Get the property length for a given direction.
  */
-function lengthFromDirection(box: inf.Box, dir: inf.Direction): inf.Length {
+export function lengthFromDirection(box: inf.Box, dir: inf.Direction): inf.Length {
 	if (dir === inf.Direction.HORIZONTAL)
 		return box.w || inf.defaultLength;
 	else if (dir === inf.Direction.VERTICAL)
@@ -18,7 +18,7 @@ function lengthFromDirection(box: inf.Box, dir: inf.Direction): inf.Length {
  * Get a pair of beginning and end absolute positions of a box in a given
  * direction.
  */
-function absoluteFromDirection(box: inf.Box, dir: inf.Direction): inf.Length[] {
+export function absoluteFromDirection(box: inf.Box, dir: inf.Direction): inf.Length[] {
 	if (!box.absolute)
 		return null;
 
@@ -34,13 +34,13 @@ function absoluteFromDirection(box: inf.Box, dir: inf.Direction): inf.Length[] {
  * Get a computed child length relative to a computed parent length. The length
  * must be a fixed length, e.g. pixels or percent.
  */
-function compFixed(parentComp: number, childLength: inf.Length): number {
+export function compFixed(parentComp: number, childLength: inf.Length): number {
 	if (childLength.unit === inf.LengthUnit.PIXELS)
 		return childLength.value;
 	else if (childLength.unit === inf.LengthUnit.PERCENT)
 		return parentComp * childLength.value;
-	else
-		throw 'Child length must be pixels or percent';
+
+	throw 'Child length must be pixels or percent';
 }
 
 /**
@@ -345,8 +345,6 @@ export class Layout {
 			});
 			return (parentComp - sum) / 2 + sumBeforeChild;
 		}
-
-		throw 'New alignment added?';
 	}
 
 	/**

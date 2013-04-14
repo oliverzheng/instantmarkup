@@ -6,40 +6,79 @@ import tree = module('../tree');
 import layout = module('../layout');
 import testUtil = module('../../testUtil');
 
+export function testLengthFromDirectionThrows(test) {
+	/* Just get around code coverage */
+	test.throws(() => {
+		layout.lengthFromDirection(null, inf.Direction.NONE);
+	});
+	test.done();
+}
+
+export function testAbsoluteFromDirectionThrows(test) {
+	test.throws(() => {
+		layout.absoluteFromDirection({
+			absolute: {}
+		}, inf.Direction.NONE);
+	});
+	test.done();
+}
+
+export function testCompFixedThrows(test) {
+	test.throws(() => {
+		layout.compFixed(0, inf.expand);
+	});
+	test.throws(() => {
+		layout.compFixed(0, inf.shrink);
+	});
+	test.throws(() => {
+		layout.compFixed(0, inf.prt(0));
+	});
+	test.done();
+}
+
 export function testEffectiveChildren(test) {
 	var root: inf.Box = {
 		id: 'root',
 		children: [{
 			id: '0',
 			w: inf.px(0),
+			h: inf.px(0),
 		}, {
 			id: '1',
 			w: inf.shrink,
+			h: inf.shrink,
 			children: [{
 				id: '1.1',
 				w: inf.px(0),
+				h: inf.px(0),
 			}, {
 				id: '1.2',
 				w: inf.prt(1),
+				h: inf.prt(1),
 				children: [{
 					id: '1.2.1',
-					w: inf.px(0)
+					w: inf.px(0),
+					h: inf.px(0),
 				}]
 			}, {
 				id: '1.3',
 				w: inf.shrink,
+				h: inf.shrink,
 				children: [{
 					id: '1.3.1',
 					w: inf.prt(1),
+					h: inf.prt(1),
 				}]
 			}]
 		}, {
 			id: '2',
 			w: inf.px(0),
+			h: inf.px(0),
 		}, {
 			id: '3',
 			absolute: {
-				l: inf.px(0)
+				l: inf.px(0),
+				t: inf.px(0),
 			}
 		}]
 	};
@@ -65,27 +104,41 @@ export function testEffectiveChildren(test) {
 	test.done();
 }
 
+export function testEffectiveChildrenThrows(test) {
+	test.throws(() => {
+		layout.effectiveChildren(null, inf.Direction.NONE,
+								 inf.LengthUnit.SHRINK);
+	});
+	test.done();
+}
+
 export function testGetParts(test) {
 	var root: inf.Box = {
 		id: 'root',
 		children: [{
 			id: '0',
 			w: inf.px(0),
+			h: inf.px(0),
 		}, {
 			id: '1',
 			w: inf.shrink,
+			h: inf.shrink,
 			children: [{
 				id: '1.1',
 				w: inf.prt(1),
+				h: inf.prt(1),
 			}]
 		}, {
 			id: '2',
 			w: inf.prt(2),
+			h: inf.prt(2),
 		}]
 	};
 	tree.refreshParents(root);
 
 	var parts = layout.getParts(root, inf.Direction.HORIZONTAL);
+	test.strictEqual(parts, 3);
+	var parts = layout.getParts(root, inf.Direction.VERTICAL);
 	test.strictEqual(parts, 3);
 
 	/* Test for zeros */
@@ -95,16 +148,39 @@ export function testGetParts(test) {
 	};
 	var parts = layout.getParts(root, inf.Direction.HORIZONTAL);
 	test.strictEqual(parts, 0);
+	var parts = layout.getParts(root, inf.Direction.VERTICAL);
+	test.strictEqual(parts, 0);
 
 	var root: inf.Box = {
 		id: 'root',
 		children: [{
 			id: '1',
-			w: inf.px(0)
+			w: inf.px(0),
+			h: inf.px(0),
 		}]
 	};
 	var parts = layout.getParts(root, inf.Direction.HORIZONTAL);
 	test.strictEqual(parts, 0);
+	var parts = layout.getParts(root, inf.Direction.VERTICAL);
+	test.strictEqual(parts, 0);
+
+	test.done();
+}
+
+export function testLayoutConstructor(test) {
+	test.throws(() => {
+		new layout.Layout({
+			w: inf.expand,
+			h: inf.px(0),
+		});
+	});
+
+	test.throws(() => {
+		new layout.Layout({
+			w: inf.px(0),
+			h: inf.expand,
+		});
+	});
 
 	test.done();
 }
@@ -172,11 +248,13 @@ export function testCompLengthPrt(test) {
 		h: inf.px(100),
 		children: [{
 			w: inf.prt(0),
+			h: inf.prt(0),
 		}]
 	};
 	var l = new layout.Layout(box);
 	var child = box.children[0];
 	test.strictEqual(l.compW(child), 0);
+	test.strictEqual(l.compH(child), 0);
 
 	test.done();
 }
@@ -187,14 +265,19 @@ export function testCompLengthExpand(test) {
 		h: inf.px(100),
 		children: [{
 			w: inf.px(20),
+			h: inf.px(20),
 		}, {
 			w: inf.pct(0.3),
+			h: inf.pct(0.3),
 		}, {
 			w: inf.prt(1),
+			h: inf.prt(1),
 		}, {
 			w: inf.expand,
+			h: inf.expand,
 		}, {
 			w: inf.expand,
+			h: inf.expand,
 		}]
 	};
 	tree.refreshParents(box);
@@ -204,12 +287,17 @@ export function testCompLengthExpand(test) {
 
 	/* These are 0 because of the prt(1) */
 	test.strictEqual(l.compW(expand1), 0);
+	test.strictEqual(l.compH(expand1), 0);
 	test.strictEqual(l.compW(expand2), 0);
+	test.strictEqual(l.compH(expand2), 0);
 
 	var child = box.children[2];
 	child.w = inf.prt(0);
+	child.h = inf.prt(0);
 	test.strictEqual(l.compW(expand1), 25);
+	test.strictEqual(l.compH(expand1), 25);
 	test.strictEqual(l.compW(expand2), 25);
+	test.strictEqual(l.compH(expand2), 25);
 
 	test.done();
 }
@@ -220,14 +308,19 @@ export function testCompLengthShrink(test) {
 		h: inf.px(100),
 		children: [{
 			w: inf.shrink,
+			h: inf.shrink,
 			children: [{
-				w: inf.px(20)
+				w: inf.px(20),
+				h: inf.px(20),
 			}, {
-				w: inf.pct(0.3) /* of 100 */
+				w: inf.pct(0.3), /* of 100 */
+				h: inf.pct(0.3),
 			}, {
-				w: inf.prt(1)
+				w: inf.prt(1),
+				h: inf.prt(1),
 			}, {
-				w: inf.prt(2)
+				w: inf.prt(2),
+				h: inf.prt(2),
 			}]
 		}]
 	};
@@ -235,16 +328,24 @@ export function testCompLengthShrink(test) {
 	var l = new layout.Layout(box);
 	var child = box.children[0];
 	test.strictEqual(l.compW(child), 100);
+	test.strictEqual(l.compH(child), 100);
 
 	child.children[2].w = inf.prt(0);
+	child.children[2].h = inf.prt(0);
 	child.children[3].w = inf.prt(0);
+	child.children[3].h = inf.prt(0);
 	test.strictEqual(l.compW(child), 50);
+	test.strictEqual(l.compH(child), 50);
 
 	child.children[2].w = inf.expand;
+	child.children[2].h = inf.expand;
 	test.strictEqual(l.compW(child), 100);
+	test.strictEqual(l.compH(child), 100);
 
 	child.children[2].w = inf.shrink;
+	child.children[2].h = inf.shrink;
 	test.strictEqual(l.compW(child), 50);
+	test.strictEqual(l.compH(child), 50);
 
 	test.done();
 }
@@ -257,21 +358,29 @@ export function testCompLengthAbs(test) {
 			absolute: {
 				l: inf.px(0),
 				r: inf.px(0),
+				t: inf.px(0),
+				b: inf.px(0),
 			}
 		}, {
 			absolute: {
 				l: inf.pct(0.1),
 				r: inf.pct(0.1),
+				t: inf.pct(0.1),
+				b: inf.pct(0.1),
 			}
 		}, {
 			absolute: {
 				l: inf.pct(-0.1),
 				r: inf.px(-5),
+				t: inf.pct(-0.1),
+				b: inf.px(-5),
 			}
 		}, {
 			absolute: {
 				l: inf.px(100),
 				r: inf.px(100),
+				t: inf.px(100),
+				b: inf.px(100),
 			}
 		}]
 	};
@@ -279,9 +388,13 @@ export function testCompLengthAbs(test) {
 	var l = new layout.Layout(box);
 
 	test.strictEqual(l.compW(box.children[0]), 100);
+	test.strictEqual(l.compH(box.children[0]), 100);
 	test.strictEqual(l.compW(box.children[1]), 80);
+	test.strictEqual(l.compH(box.children[1]), 80);
 	test.strictEqual(l.compW(box.children[2]), 115);
+	test.strictEqual(l.compH(box.children[2]), 115);
 	test.strictEqual(l.compW(box.children[3]), 0);
+	test.strictEqual(l.compH(box.children[3]), 0);
 
 	test.done();
 }
@@ -293,16 +406,22 @@ export function testCompLengthCross(test) {
 		direction: inf.Direction.HORIZONTAL,
 		children: [{
 			h: inf.px(50),
+			w: inf.px(50),
 		}, {
 			h: inf.pct(0.5),
+			w: inf.pct(0.5),
 		}, {
 			h: inf.prt(1),
+			w: inf.prt(1),
 		}, {
 			h: inf.prt(2),
+			w: inf.prt(2),
 		}, {
 			h: inf.expand,
+			w: inf.expand,
 		}, {
 			h: inf.shrink,
+			w: inf.shrink,
 		}]
 	};
 	tree.refreshParents(box);
@@ -314,6 +433,14 @@ export function testCompLengthCross(test) {
 	test.strictEqual(l.compH(box.children[3]), 100);
 	test.strictEqual(l.compH(box.children[4]), 100);
 	test.strictEqual(l.compH(box.children[5]), 0);
+
+	box.direction = inf.Direction.VERTICAL;
+	test.strictEqual(l.compW(box.children[0]), 50);
+	test.strictEqual(l.compW(box.children[1]), 50);
+	test.strictEqual(l.compW(box.children[2]), 100);
+	test.strictEqual(l.compW(box.children[3]), 100);
+	test.strictEqual(l.compW(box.children[4]), 100);
+	test.strictEqual(l.compW(box.children[5]), 0);
 
 	test.done();
 }
@@ -554,6 +681,22 @@ export var testCompPosition = {
 
 		test.done();
 	},
+}
+
+export function testCompPositionAbsThrows(test) {
+	var root: inf.Box = {
+		w: inf.px(100),
+		h: inf.px(100),
+		children: [{
+			absolute: {}
+		}]
+	};
+	tree.refreshParents(root);
+	var l = new layout.Layout(root);
+	test.throws(() => {
+		l.compX(root.children[0]);
+	});
+	test.done();
 }
 
 export function testCompPositionCross(test) {

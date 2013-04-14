@@ -129,6 +129,9 @@ export function isBefore(first: inf.Box, second: inf.Box): bool {
  * @return The original parent of the box.
  */
 export function reparent(box: inf.Box, parent: inf.Box): inf.Box {
+	if (isAncestor(box, parent))
+		throw 'A box cannot be reparented to its descendant.';
+
 	if (parent === box.parent)
 		return parent;
 

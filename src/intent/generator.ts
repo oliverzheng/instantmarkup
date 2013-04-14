@@ -6,7 +6,7 @@ import iter = module('./iterator')
 /**
  * Turn an array into an iterator.
  */
-export function arrayToIter(boxes: () => inf.Box): iter.BoxIter {
+export function arrayToIter(boxes: inf.Box[]): iter.BoxIter {
 	var i = 0;
 	return iter.makeIter(() => {
 		if (i < boxes.length)
