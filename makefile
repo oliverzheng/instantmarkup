@@ -1,4 +1,7 @@
-OUTPUT_DIR=bin
+BIN_DIR=bin
+JS_DIR=$(BIN_DIR)/js
+JS_NODTS_DIR=$(BIN_DIR)/js-nodts
+JS_INST_DIR=$(BIN_DIR)/js-inst
 
 SOURCES=\
 	src/extract/interfaces.ts \
@@ -15,27 +18,43 @@ SOURCES=\
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
 	src/intent/test/testTree.ts \
+	src/test/testCoverage.ts \
 	src/testUtil.ts \
 	src/main.ts \
 
-CC=node_modules/typescript/bin/tsc
-TEST=node_modules/nodeunit/bin/nodeunit
+CC=node_modules/.bin/tsc
+TEST=node_modules/.bin/nodeunit
+INST=node_modules/.bin/jscoverage
 
-build: deps $(OUTPUT_DIR)
+build: deps $(JS_DIR)
 
 # There is no dependency detection yet. Each incremental build is a full build.
-$(OUTPUT_DIR): $(SOURCES) makefile
-	@rm -rf $(OUTPUT_DIR)
-	@mkdir -p $(OUTPUT_DIR)
+$(JS_DIR): $(SOURCES) makefile
+	@rm -rf $(JS_DIR)
+	@mkdir -p $(JS_DIR)
 	@echo -n Compiling...
-	@$(CC) --declaration --out $(OUTPUT_DIR) $(SOURCES)
+	@$(CC) --declaration --out $(JS_DIR) $(SOURCES)
 	@echo ' Done'
 
 test: build
-	@$(TEST) $(shell find $(OUTPUT_DIR) -ipath */test/test*.js)
+	@$(TEST) $(shell find $(JS_DIR) -ipath '*/test/test*.js')
 
 debug: build
-	@node debug $(TEST) $(shell find $(OUTPUT_DIR) -ipath */test/test*.js)
+	@node debug $(TEST) $(shell find $(JS_DIR) -ipath '*/test/test*.js')
+
+$(JS_INST_DIR): $(JS_DIR)
+	@rm -rf $(JS_NODTS_DIR) $(JS_INST_DIR)
+	@cp -r $(JS_DIR) $(JS_NODTS_DIR)
+	@find $(JS_NODTS_DIR) -name '*.d.ts' -exec rm -r {} \;
+	@echo -n Instrumenting...
+	@$(INST) $(JS_NODTS_DIR) $(JS_INST_DIR)
+	@touch $(JS_INST_DIR)
+	@echo ' Done'
+
+instrument: $(JS_INST_DIR)
+
+coverage: instrument
+	@$(TEST) --reporter minimal $(shell find $(JS_INST_DIR) -ipath '*/test/test*.js')
 
 deps: node_modules
 
@@ -44,9 +63,9 @@ node_modules: package.json
 	node_modules/ntspm/bin/ntspm
 
 clean:
-	rm -rf $(OUTPUT_DIR)
+	rm -rf $(BIN_DIR)
 
 cleanall: clean
 	rm -rf _typings.d.ts typings node_modules
 
-.PHONY: build test debug deps clean cleanall
+.PHONY: build test debug instrument coverage deps clean cleanall

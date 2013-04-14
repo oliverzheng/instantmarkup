@@ -10,7 +10,8 @@
 	"devDependencies": {
 		"typescript": "0.8.x",
 		"ntspm": "git://github.com/oliverzheng/ntspm",
-		"nodeunit": "0.7.x"
+		"nodeunit": "0.7.x",
+		"jscoverage": "0.3.6"
 	},
 	"dependencies": {
 		"jsonschema": "0.1.x",
