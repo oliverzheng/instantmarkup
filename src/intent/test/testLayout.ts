@@ -768,7 +768,7 @@ export function testCompPositionCross(test) {
 	test.done();
 }
 
-export function testGetBoundingRect(test) {
+export function testGetRect(test) {
 	var root: inf.Box = {
 		w: inf.px(100),
 		h: inf.px(100),
@@ -791,25 +791,25 @@ export function testGetBoundingRect(test) {
 	tree.refreshParents(root);
 	var l = new layout.Layout(root);
 
-	var rect = l.getBoundingRect(root);
+	var rect = l.getRect(root);
 	test.strictEqual(rect.x, 0);
 	test.strictEqual(rect.y, 0);
 	test.strictEqual(rect.w, 100);
 	test.strictEqual(rect.h, 100);
 
-	var rect = l.getBoundingRect(root.children[0]);
+	var rect = l.getRect(root.children[0]);
 	test.strictEqual(rect.x, 0);
 	test.strictEqual(rect.y, 0);
 	test.strictEqual(rect.w, 30);
 	test.strictEqual(rect.h, 30);
 
-	var rect = l.getBoundingRect(root.children[1]);
+	var rect = l.getRect(root.children[1]);
 	test.strictEqual(rect.x, 0);
 	test.strictEqual(rect.y, 30);
 	test.strictEqual(rect.w, 50);
 	test.strictEqual(rect.h, 50);
 
-	var rect = l.getBoundingRect(root.children[1].children[0]);
+	var rect = l.getRect(root.children[1].children[0]);
 	test.strictEqual(rect.x, 20);
 	test.strictEqual(rect.y, 70);
 	test.strictEqual(rect.w, 10);

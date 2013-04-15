@@ -11,8 +11,8 @@ import util = module('./util');
  */
 export function boxOverlaps(layout: l.Layout,
 							first: inf.Box, second: inf.Box): bool {
-	var rect1 = layout.getBoundingRect(first);
-	var rect2 = layout.getBoundingRect(second);
+	var rect1 = layout.getRect(first);
+	var rect2 = layout.getRect(second);
 
 	return util.rectOverlaps(rect1, rect2);
 }
@@ -53,7 +53,8 @@ export function getTopMost(layout: l.Layout, root: inf.Box,
  * @param layout The layout the boxes belong to.
  * @param boxes List of boxes to sort.
  * @param dir Direction to sort by.
- * @return A new list of the input boxes sorted by that direction.
+ * @return A new list of the input boxes sorted by that direction. The other
+ * direction is used as a tie breaker.
  */
 export function sortByDirection(layout: l.Layout, boxes: inf.Box[],
 								dir: inf.Direction): inf.Box[] {
@@ -61,7 +62,15 @@ export function sortByDirection(layout: l.Layout, boxes: inf.Box[],
 	sorted.sort((box1, box2) => {
 		var posAbs1 = layout.compPositionAbs(box1, dir);
 		var posAbs2 = layout.compPositionAbs(box2, dir);
-		return posAbs1 - posAbs2;
+		var diff = posAbs1 - posAbs2;
+		if (diff !== 0)
+			return diff;
+		else {
+			var otherDir = util.otherDirection(dir);
+			var crossPosAbs1 = layout.compPositionAbs(box1, otherDir);
+			var crossPosAbs2 = layout.compPositionAbs(box2, otherDir);
+			return crossPosAbs1 - crossPosAbs2;
+		}
 	});
 	return sorted;
 }
@@ -75,12 +84,12 @@ export function sortByDirection(layout: l.Layout, boxes: inf.Box[],
 export function findWithin(layout: l.Layout, rect: inf.Rect,
 						   partial: bool): iter.BoxIter {
 	return gen.depthFirst(layout.root).filter((box) => {
-		var boxRect = layout.getBoundingRect(box);
+		var boxRect = layout.getRect(box);
 
 		if (partial)
 			/* We do not want boxes that contain the specified rect. */
 			return (util.rectOverlaps(boxRect, rect) &&
-					(util.rectEquals(boxRect, rect) || 
+					(util.rectEquals(boxRect, rect) ||
 					 !util.rectBiggerThan(boxRect, rect)));
 		else
 			return util.rectContains(rect, boxRect);

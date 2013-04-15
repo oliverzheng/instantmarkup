@@ -2,6 +2,7 @@
 
 import inf = module('../interfaces');
 import tree = module('../tree');
+import gen = module('../generator');
 import testUtil = module('../../testUtil');
 
 function getStructure(box: inf.Box) {
@@ -79,6 +80,24 @@ export function testGetBoxById(test) {
 	}
 
 	test.equal(tree.getBoxById(this.root, 'derp'), null);
+
+	test.done();
+}
+
+export function testHasUniqueIds(test) {
+	var boxes: inf.Box[] = [{
+		id: '3'
+	}, {
+		id: '4'
+	}];
+
+	test.equal(tree.hasUniqueIds(gen.arrayToIter(boxes)), true);
+
+	boxes[1].id = '3';
+	test.equal(tree.hasUniqueIds(gen.arrayToIter(boxes)), false);
+
+	boxes[1].id = null;
+	test.equal(tree.hasUniqueIds(gen.arrayToIter(boxes)), false);
 
 	test.done();
 }

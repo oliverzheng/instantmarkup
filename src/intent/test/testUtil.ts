@@ -269,5 +269,78 @@ export function testRectOverlaps(test) {
 	test.equal(util.rectOverlaps(rect1, rect2), false);
 	test.equal(util.rectOverlaps(rect2, rect1), false);
 
+	/* Empty no-overlap */
+	var rect1 = {
+		x: 0,
+		y: 0,
+		w: 0,
+		h: 0,
+	};
+	var rect2 = {
+		x: 0,
+		y: 0,
+		w: 10,
+		h: 10,
+	};
+	test.equal(util.rectOverlaps(rect1, rect2), false);
+	test.equal(util.rectOverlaps(rect2, rect1), false);
+
+	/* Empty overlap */
+	var rect1 = {
+		x: 5,
+		y: 5,
+		w: 0,
+		h: 0,
+	};
+	var rect2 = {
+		x: 0,
+		y: 0,
+		w: 10,
+		h: 10,
+	};
+	test.equal(util.rectOverlaps(rect1, rect2), true);
+	test.equal(util.rectOverlaps(rect2, rect1), true);
+
+	test.done();
+}
+
+export function testGetBoundingRect(test) {
+	var rect = {
+		x: 0,
+		y: 0,
+		w: 0,
+		h: 0,
+	};
+	testUtil.equals(test, util.getBoundingRect([rect]), rect);
+
+	var rect1 = {
+		x: 10,
+		y: 10,
+		w: 20,
+		h: 20,
+	};
+	var rect2 = {
+		x: 50,
+		y: 50,
+		w: 20,
+		h: 20,
+	};
+	var contained = {
+		x: 10,
+		y: 10,
+		w: 60,
+		h: 60,
+	};
+	
+	testUtil.equals(test, util.getBoundingRect([rect1, rect2]), contained);
+	testUtil.equals(test, util.getBoundingRect([rect2, rect1]), contained);
+	testUtil.equals(test, util.getBoundingRect([contained, rect1]), contained);
+	testUtil.equals(test, util.getBoundingRect([rect1, contained]), contained);
+	testUtil.equals(test, util.getBoundingRect([rect1, rect2, contained]), contained);
+
+	test.throws(() => {
+		util.getBoundingRect([]);
+	});
+
 	test.done();
 }

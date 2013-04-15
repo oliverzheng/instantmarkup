@@ -105,17 +105,50 @@ export function rectBiggerThan(rect1: inf.Rect, rect2: inf.Rect): bool {
 export function rectOverlaps(rect1: inf.Rect, rect2: inf.Rect): bool {
 	var horizOverlap = (
 		/* Left edge of rect1 is between rect2. */
-		rect1.x >= rect2.x && rect1.x < (rect2.x + rect2.w) ||
+		(rect1.x >= rect2.x && rect1.x < (rect2.x + rect2.w) &&
+		 rect1.x + rect1.w > rect2.x) || /* Zero width does not overlap. */
 		/* Left edge of rect2 is between rect1. */
-		rect2.x >= rect1.x && rect2.x < (rect1.x + rect1.w)
+		(rect2.x >= rect1.x && rect2.x < (rect1.x + rect1.w) &&
+		 rect2.x + rect2.w > rect1.x)
 	);
 
 	var vertOverlap = (
-		/* Left edge of rect1 is between rect2. */
-		rect1.y >= rect2.y && rect1.y < (rect2.y + rect2.h) ||
-		/* Left edge of rect2 is between rect1. */
-		rect2.y >= rect1.y && rect2.y < (rect1.y + rect1.h)
+		/* Top edge of rect1 is between rect2. */
+		(rect1.y >= rect2.y && rect1.y < (rect2.y + rect2.h) &&
+		 rect1.y + rect1.h > rect2.y) ||
+		/* Top edge of rect2 is between rect1. */
+		(rect2.y >= rect1.y && rect2.y < (rect1.y + rect1.h) &&
+		 rect2.y + rect2.h > rect1.y)
 	);
 
 	return horizOverlap && vertOverlap;
+}
+
+/**
+ * Get the rectangle that most tightly fits an input of rectangles.
+ */
+export function getBoundingRect(rects: inf.Rect[]): inf.Rect {
+	if (rects.length === 0)
+		throw 'No rects';
+
+	/* Don't modify the original rects. */
+	var first = rects.pop();
+	var bound = {
+		x: first.x,
+		y: first.y,
+		w: first.w,
+		h: first.h,
+	};
+	while (rects.length > 0) {
+		var rect = rects.pop();
+		bound = {
+			x: Math.min(bound.x, rect.x),
+			y: Math.min(bound.y, rect.y),
+			w: Math.max(bound.x + bound.w, rect.x + rect.w),
+			h: Math.max(bound.y + bound.h, rect.y + rect.h),
+		};
+		bound.w -= bound.x;
+		bound.h -= bound.y;
+	}
+	return bound;
 }

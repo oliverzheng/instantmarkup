@@ -9,5 +9,16 @@ export function getSchemaPath(name: string): string {
 }
 
 export function equals(test, first, second) {
-	return test.strictEqual(JSON.stringify(first), JSON.stringify(second));
+	if (typeof first === 'object') {
+		for (var prop in first)
+			if (first.hasOwnProperty(prop)) {
+				test.ok(second.hasOwnProperty(prop));
+				equals(test, first[prop], second[prop]);
+			}
+		for (var prop in second)
+			if (second.hasOwnProperty(prop))
+				test.ok(first.hasOwnProperty(prop));
+	} else {
+		return test.strictEqual(JSON.stringify(first), JSON.stringify(second));
+	}
 }

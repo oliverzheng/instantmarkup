@@ -369,12 +369,21 @@ export class Layout {
 	/**
 	 * @return A bounding rect that fits around the input box.
 	 */
-	getBoundingRect(box: inf.Box): inf.Rect {
+	getRect(box: inf.Box): inf.Rect {
 		return {
 			x: this.compXAbs(box),
 			y: this.compYAbs(box),
 			w: this.compW(box),
 			h: this.compH(box),
 		};
+	}
+
+	/**
+	 * @return A bounding rect that fits around the input boxes.
+	 */
+	getBoundingRect(boxes: inf.Box[]): inf.Rect {
+		return util.getBoundingRect(boxes.map((box) => {
+			return this.getRect(box);
+		}));
 	}
 }

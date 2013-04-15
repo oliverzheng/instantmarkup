@@ -14,21 +14,26 @@ SOURCES=\
 	src/intent/iterator.ts \
 	src/intent/layout.ts \
 	src/intent/search.ts \
+	src/intent/stack.ts \
 	src/intent/tree.ts \
 	src/intent/util.ts \
 	src/intent/test/testGenerator.ts \
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
 	src/intent/test/testSearch.ts \
+	src/intent/test/testStack.ts \
 	src/intent/test/testTree.ts \
 	src/intent/test/testUtil.ts \
 	src/test/testCoverage.ts \
+	src/test/testTestUtil.ts \
 	src/testUtil.ts \
 	src/main.ts \
 
 CC=node_modules/.bin/tsc
 TEST=node_modules/.bin/nodeunit
 INST=node_modules/.bin/jscoverage
+
+RUNTEST=$(TEST) $(shell find $(JS_DIR) -ipath '*/test/test*.js')
 
 build: deps $(JS_DIR)
 
@@ -41,10 +46,10 @@ $(JS_DIR): $(SOURCES) makefile
 	@echo ' Done'
 
 test: build
-	@$(TEST) $(shell find $(JS_DIR) -ipath '*/test/test*.js')
+	@$(RUNTEST)
 
 debug: build
-	@node debug $(TEST) $(shell find $(JS_DIR) -ipath '*/test/test*.js')
+	@node debug $(RUNTEST)
 
 $(JS_INST_DIR): $(JS_DIR)
 	@rm -rf $(JS_NODTS_DIR) $(JS_INST_DIR)
@@ -60,6 +65,10 @@ instrument: $(JS_INST_DIR)
 coverage: instrument
 	@$(TEST) --reporter minimal $(shell find $(JS_INST_DIR) -ipath '*/test/test*.js')
 
+precheckin:
+	@echo Remove 'debugger' statements:
+	@grep -i -R --color debugger src || echo 'None found.'
+
 deps: node_modules
 
 node_modules: package.json
@@ -72,4 +81,4 @@ clean:
 cleanall: clean
 	rm -rf _typings.d.ts typings node_modules
 
-.PHONY: build test debug instrument coverage deps clean cleanall
+.PHONY: build test debug instrument coverage precheckin deps clean cleanall

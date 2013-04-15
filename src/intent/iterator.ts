@@ -9,6 +9,7 @@ export interface BoxIter {
 	first: (condition?: (box: inf.Box) => bool) => inf.Box;
 	forEach: (callback: (box: inf.Box, i: number) => any) => void;
 	filter: (condition: (box: inf.Box) => bool) => BoxIter;
+	any: (condition?: (box: inf.Box) => bool) => bool;
 }
 
 /**
@@ -31,6 +32,10 @@ export function makeIter(gen: () => inf.Box): BoxIter {
 
 	iter.filter = (condition: (box: inf.Box) => bool) => {
 		return filter(iter, condition);
+	};
+
+	iter.any = (condition: (box: inf.Box) => bool) => {
+		return any(iter, condition);
 	};
 
 	return iter;
@@ -77,4 +82,11 @@ export function filter(iter: BoxIter,
 		while ((box = iter()) && !condition(box));
 		return box;
 	});
+}
+
+/**
+ * Returns whether or not any box in the iterator match the condition.
+ */
+export function any(iter: BoxIter, condition?: (box: inf.Box) => bool): bool {
+	return first(iter, condition) != null;
 }

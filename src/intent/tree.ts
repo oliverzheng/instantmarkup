@@ -2,6 +2,7 @@
 
 import inf = module('./interfaces')
 import gen = module('./generator');
+import iter = module('./iterator');
 
 /**
  * Recalculate parent relationships for all children.
@@ -36,6 +37,19 @@ export function getBoxById(root: inf.Box, id: string): inf.Box {
 	return gen.depthFirst(root).first((box) => {
 		return (box.id === id);
 	});
+}
+
+/**
+ * Verifies if a list of boxes all have unique non-null ids.
+ */
+export function hasUniqueIds(it: iter.BoxIter): bool {
+	var ids: { [id: string]: bool; } = {};
+
+	var box: inf.Box;
+	while ((box = it()) && box.id != null && !ids[box.id])
+		ids[box.id] = true;
+
+	return box == null;
 }
 
 /**
