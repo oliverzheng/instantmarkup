@@ -1,5 +1,7 @@
 /// <reference path ="../../_typings.d.ts" />
 
+var coll = require('coll');
+
 import inf = module('./interfaces');
 import l = module('./layout');
 import gen = module('./generator');
@@ -79,14 +81,14 @@ export function getGap(layout: l.Layout, box1: inf.Box, box2: inf.Box,
  * a stack.
  *
  * @param layout Layout the boxes belong to.
- * @param boxes List of non-overlapping boxes. They must have unique ids.
+ * @param boxes List of non-overlapping boxes.
  * @return A list stacks, where each input box is in at most one of these
  * stacks.
  */
 export function findStacks(layout: l.Layout, boxes: inf.Box[]): Stack[] {
 	var possibleStacks: Stack[] = [];
 	/* Map from box to the stacks they are in. */
-	var stacksByBox: { [id: string]: Stack[]; } = {};
+	var stacksByBox = new coll.Map;
 
 	var dirs = [inf.Direction.HORIZONTAL, inf.Direction.VERTICAL];
 	var currentStack: Stack;
@@ -126,15 +128,15 @@ export function findStacks(layout: l.Layout, boxes: inf.Box[]): Stack[] {
 					currentStack.boxes.push(prevBox);
 
 					possibleStacks.push(currentStack);
-					if (!stacksByBox[prevBox.id])
-						stacksByBox[prevBox.id] = [];
-					stacksByBox[prevBox.id].push(currentStack);
+					if (!stacksByBox.hasKey(prevBox))
+						stacksByBox.set(prevBox, []);
+					stacksByBox.get(prevBox).push(currentStack);
 				}
 
 				currentStack.boxes.push(box);
-				if (!stacksByBox[box.id])
-					stacksByBox[box.id] = [];
-				stacksByBox[box.id].push(currentStack);
+				if (!stacksByBox.hasKey(box))
+					stacksByBox.set(box, []);
+				stacksByBox.get(box).push(currentStack);
 
 			} else {
 				/* Reset the current stack if there is a gap in the middle */
@@ -170,17 +172,19 @@ export function findStacks(layout: l.Layout, boxes: inf.Box[]): Stack[] {
 
 		/* Remove all boxes of our kept stack from other stacks. */
 		stack.boxes.forEach((box) => {
-			var stacks = stacksByBox[box.id];
-			if (stacks && stacks.length >= 2) {
-				for (var j = 0; j < stacks.length; ++j) {
-					var otherStack = stacks[j];
-					if (otherStack !== stack) {
-						otherStack.removeBox(box);
-						needSort = true;
+			var stacks = stacksByBox.get(box, null);
+			if (stacks) {
+				if (stacks.length >= 2) {
+					for (var j = 0; j < stacks.length; ++j) {
+						var otherStack = stacks[j];
+						if (otherStack !== stack) {
+							otherStack.removeBox(box);
+							needSort = true;
+						}
 					}
 				}
+				stacksByBox.remove(box);
 			}
-			delete stacksByBox[box.id];
 		});
 	}
 	return keepStacks;
