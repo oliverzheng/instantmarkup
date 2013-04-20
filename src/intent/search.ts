@@ -79,12 +79,22 @@ export function sortByDirection(layout: l.Layout, boxes: inf.Box[],
  * @param layout The layout to look within.
  * @param rect The bounding rectangle to search boxes within.
  * @param partial If boxes that overlap partial edges should be included.
+ * @param contained If boxes that contain the rect completely should be
+ * included.
+ * @param it The iterator to use. Defaults to depthFirst on layout.root.
  * @return Iterator of boxes that are contained within rect.
  */
 export function findWithin(layout: l.Layout, rect: inf.Rect,
-						   partial: bool): iter.BoxIter {
-	return gen.depthFirst(layout.root).filter((box) => {
+						   partial: bool, contained: bool,
+						   it?: iter.BoxIter): iter.BoxIter {
+	if (!it)
+		it = gen.depthFirst(layout.root);
+
+	return it.filter((box) => {
 		var boxRect = layout.getRect(box);
+
+		if (contained && util.rectContains(boxRect, rect))
+			return true;
 
 		if (partial)
 			/* We do not want boxes that contain the specified rect. */

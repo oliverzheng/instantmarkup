@@ -75,6 +75,13 @@ export function rectEquals(rect1: inf.Rect, rect2: inf.Rect): bool {
 }
 
 /**
+ * Returns true if a rect is empty.
+ */
+export function rectEmpty(rect: inf.Rect): bool {
+	return rect.w <= 0 || rect.h <= 0;
+}
+
+/**
  * Returns whether or not rect1 completely contains rect2.
  */
 export function rectContains(rect1: inf.Rect, rect2: inf.Rect): bool {

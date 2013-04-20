@@ -2,6 +2,7 @@
 
 import inf = module('../interfaces');
 import layout = module('../layout');
+import gen = module('../generator');
 import tree = module('../tree');
 import search = module('../search');
 import testUtil = module('../../testUtil');
@@ -206,9 +207,10 @@ export function testFindWithin(test) {
 	tree.refreshParents(root);
 	var l = new layout.Layout(root);
 
-	function expect(rect: inf.Rect, partial: bool, expected: string[]) {
+	function expect(rect: inf.Rect, partial: bool, contained: bool,
+					expected: string[]) {
 		var ids: string[] = [];
-		search.findWithin(l, rect, partial).forEach((box) => {
+		search.findWithin(l, rect, partial, contained).forEach((box) => {
 			ids.push(box.id);
 		});
 		testUtil.equals(test, expected, ids);
@@ -220,8 +222,10 @@ export function testFindWithin(test) {
 		w: 20,
 		h: 20,
 	};
-	expect(rect, false, ['1']);
-	expect(rect, true, ['1', 'root']);
+	expect(rect, false, false, ['1']);
+	expect(rect, true, false, ['1', 'root']);
+	expect(rect, false, true, ['1', 'root']);
+	expect(rect, true, true, ['1', 'root']);
 
 	var rect = {
 		x: 0,
@@ -229,8 +233,10 @@ export function testFindWithin(test) {
 		w: 30,
 		h: 30,
 	};
-	expect(rect, false, ['1']);
-	expect(rect, true, ['1', '2', 'root']);
+	expect(rect, false, false, ['1']);
+	expect(rect, true, false, ['1', '2', 'root']);
+	expect(rect, false, true, ['1', 'root']);
+	expect(rect, true, true, ['1', '2', 'root']);
 
 	var rect = {
 		x: 0,
@@ -238,8 +244,10 @@ export function testFindWithin(test) {
 		w: 10,
 		h: 10,
 	};
-	expect(rect, false, []);
-	expect(rect, true, ['2', 'root']);
+	expect(rect, false, false, []);
+	expect(rect, true, false, ['2', 'root']);
+	expect(rect, false, true, ['2', 'root']);
+	expect(rect, true, true, ['2', 'root']);
 
 	var rect = {
 		x: 5,
@@ -247,8 +255,26 @@ export function testFindWithin(test) {
 		w: 5,
 		h: 5,
 	};
-	expect(rect, false, []);
-	expect(rect, true, []);
+	expect(rect, false, false, []);
+	expect(rect, true, false, []);
+	expect(rect, false, true, ['2', 'root']);
+	expect(rect, true, true, ['2', 'root']);
+
+	var rect = {
+		x: 0,
+		y: 0,
+		w: 20,
+		h: 60,
+	};
+	var ids: string[] = [];
+	var it = gen.depthFirst(l.root).filter((box) => {
+		return box.id !== '2';
+	});
+	search.findWithin(l, rect, true, true, it).forEach((box) => {
+		ids.push(box.id);
+	});
+	var expected = ['1', '3', 'root'];
+	testUtil.equals(test, expected, ids);
 
 	test.done();
 }

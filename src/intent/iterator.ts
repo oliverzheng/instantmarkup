@@ -10,6 +10,10 @@ export interface BoxIter {
 	forEach: (callback: (box: inf.Box, i: number) => any) => void;
 	filter: (condition: (box: inf.Box) => bool) => BoxIter;
 	any: (condition?: (box: inf.Box) => bool) => bool;
+	take: (count: number) => BoxIter;
+	takeWhile: (condition: (box: inf.Box) => bool) => BoxIter;
+	drop: (count: number) => BoxIter;
+	dropWhile: (condition: (box: inf.Box) => bool) => BoxIter;
 }
 
 /**
@@ -36,6 +40,22 @@ export function makeIter(gen: () => inf.Box): BoxIter {
 
 	iter.any = (condition: (box: inf.Box) => bool) => {
 		return any(iter, condition);
+	};
+
+	iter.take = (count: number) => {
+		return take(iter, count);
+	};
+
+	iter.takeWhile = (condition: (box: inf.Box) => bool) => {
+		return takeWhile(iter, condition);
+	};
+
+	iter.drop = (count: number) => {
+		return drop(iter, count);
+	};
+
+	iter.dropWhile = (condition: (box: inf.Box) => bool) => {
+		return dropWhile(iter, condition);
 	};
 
 	return iter;
@@ -89,4 +109,63 @@ export function filter(iter: BoxIter,
  */
 export function any(iter: BoxIter, condition?: (box: inf.Box) => bool): bool {
 	return first(iter, condition) != null;
+}
+
+/**
+ * Take the first count of boxes.
+ */
+export function take(iter: BoxIter, count: number): BoxIter {
+	return makeIter(() => {
+		if (count > 0) {
+			count--;
+			return iter();
+		}
+	});
+}
+
+/**
+ * Returns an iterator that produces as many boxes as it can until condition
+ * fails.
+ */
+export function takeWhile(iter: BoxIter,
+						  condition: (box: inf.Box) => bool): BoxIter {
+	var take = true;
+	return makeIter(() => {
+		if (take) {
+			var box = iter();
+			if (box && condition(box))
+				return box;
+			else
+				take = false;
+		}
+	});
+}
+
+/**
+ * Drop the first count of boxes.
+ */
+export function drop(iter: BoxIter, count: number): BoxIter {
+	var drop = true;
+	return makeIter(() => {
+		if (drop) {
+			while (count-- > 0 && iter());
+			drop = false;
+		}
+
+		return iter();
+	});
+}
+
+/**
+ * Returns an iterator that only starts producing boxes when condition fails.
+ */
+export function dropWhile(iter: BoxIter,
+						  condition: (box: inf.Box) => bool): BoxIter {
+	var drop = true;
+	return makeIter(() => {
+		var box: inf.Box;
+		while ((box = iter()) && drop && condition(box));
+		drop = false;
+		return box;
+	});
 }

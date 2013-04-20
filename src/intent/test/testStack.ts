@@ -5,6 +5,7 @@ import layout = module('../layout');
 import gen = module('../generator');
 import tree = module('../tree');
 import stack = module('../stack');
+import vs = module('../visualSnapshot');
 import util = module('../util');
 import testUtil = module('../../testUtil');
 
@@ -220,6 +221,230 @@ export function testFindStacksConflict(test) {
 	test.strictEqual(stacks[0].boxes[0], root.children[0].children[0]);
 	test.strictEqual(stacks[0].boxes[1], root.children[0].children[1]);
 	test.strictEqual(stacks[0].boxes[2], root.children[0].children[2]);
+
+	test.done();
+}
+
+/**
+ * Group two boxes next to each other.
+ */
+export function testStackGroupingSimple(test) {
+	var root: inf.Box = {
+		id: 'root',
+		w: inf.px(100),
+		h: inf.px(100),
+		direction: inf.Direction.HORIZONTAL,
+		children: [{
+			id: 'child1',
+			w: inf.px(50),
+			h: inf.px(50),
+		}, {
+			id: 'child2',
+			w: inf.px(50),
+			h: inf.px(50),
+		}]
+	};
+	tree.refreshParents(root);
+	var l = new layout.Layout(root);
+	var initialState = new vs.VisualSnapshot(l);
+
+	var count = 0;
+	stack.applyStacks(l, 'prefix', () => {
+		count++;
+	});
+
+	test.strictEqual(count, 1);
+	test.strictEqual(initialState.equalsLayout(l), true);
+	test.strictEqual(root.children.length, 1);
+	test.strictEqual(root.children[0].children.length, 2);
+	test.strictEqual(root.children[0].children[0].id, 'child1');
+	test.strictEqual(root.children[0].children[1].id, 'child2');
+
+	test.done();
+}
+
+/**
+ * Group two boxes with a gap in the middle.
+ */
+export function testStackGroupGap(test) {
+	var root: inf.Box = {
+		id: 'root',
+		w: inf.px(100),
+		h: inf.px(100),
+		children: [{
+			id: 'child1',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(0),
+				l: inf.px(0),
+			}
+		}, {
+			id: 'child2',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(0),
+				l: inf.px(30),
+			}
+		}]
+	};
+	tree.refreshParents(root);
+	var l = new layout.Layout(root);
+	var initialState = new vs.VisualSnapshot(l);
+
+	var count = 0;
+	stack.applyStacks(l, 'prefix', () => {
+		count++;
+	});
+
+	test.strictEqual(count, 1);
+	test.strictEqual(initialState.equalsLayout(l), true);
+	test.strictEqual(root.children.length, 1);
+	test.strictEqual(root.children[0].direction, inf.Direction.HORIZONTAL);
+	test.strictEqual(root.children[0].children.length, 3);
+	test.strictEqual(root.children[0].children[0].id, 'child1');
+	test.strictEqual(root.children[0].children[2].id, 'child2');
+	test.ok(util.lengthEquals(root.children[0].children[1].w, inf.px(10)));
+	test.ok(util.lengthEquals(root.children[0].children[1].h, inf.px(20)));
+
+	test.done();
+}
+
+/**
+ * Group two rows of boxes.
+ */
+export function testStackGroupMultiple(test) {
+	var root: inf.Box = {
+		id: 'root',
+		w: inf.px(100),
+		h: inf.px(100),
+		children: [{
+			id: 'child1',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(0),
+				l: inf.px(0),
+			}
+		}, {
+			id: 'child2',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(0),
+				l: inf.px(30),
+			}
+		}, {
+			id: 'child3',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(30),
+				l: inf.px(5),
+			}
+		}, {
+			id: 'child4',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(30),
+				l: inf.px(25),
+			}
+		}]
+	};
+	tree.refreshParents(root);
+	var l = new layout.Layout(root);
+	var initialState = new vs.VisualSnapshot(l);
+
+	var count = 0;
+	stack.applyStacks(l, 'prefix', () => {
+		count++;
+	});
+
+	test.strictEqual(count, 1);
+	test.strictEqual(initialState.equalsLayout(l), true);
+	test.strictEqual(root.children.length, 2);
+
+	test.strictEqual(root.children[0].direction, inf.Direction.HORIZONTAL);
+	test.strictEqual(root.children[0].children.length, 3);
+	test.strictEqual(root.children[0].children[0].id, 'child1');
+	test.strictEqual(root.children[0].children[2].id, 'child2');
+	test.ok(util.lengthEquals(root.children[0].children[1].w, inf.px(10)));
+	test.ok(util.lengthEquals(root.children[0].children[1].h, inf.px(20)));
+
+	test.strictEqual(root.children[1].direction, inf.Direction.HORIZONTAL);
+	test.strictEqual(root.children[1].children.length, 2);
+	test.strictEqual(root.children[1].children[0].id, 'child3');
+	test.strictEqual(root.children[1].children[1].id, 'child4');
+
+	test.done();
+}
+
+/**
+ * Group two boxes, and then group the result with another box.
+ */
+export function testStackGroupIterative(test) {
+	var root: inf.Box = {
+		id: 'root',
+		w: inf.px(100),
+		h: inf.px(100),
+		children: [{
+			id: 'child1',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(0),
+				l: inf.px(0),
+			}
+		}, {
+			id: 'child2',
+			w: inf.px(20),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(0),
+				l: inf.px(30),
+			}
+		}, {
+			id: 'child3',
+			w: inf.px(50),
+			h: inf.px(20),
+			absolute: {
+				t: inf.px(30),
+				l: inf.px(0),
+			}
+		}]
+	};
+	tree.refreshParents(root);
+	var l = new layout.Layout(root);
+	var initialState = new vs.VisualSnapshot(l);
+
+	var count = 0;
+	stack.applyStacks(l, 'prefix', () => {
+		count++;
+	});
+
+	test.strictEqual(count, 2);
+	test.strictEqual(initialState.equalsLayout(l), true);
+	test.strictEqual(root.children.length, 1);
+
+	test.strictEqual(root.children[0].direction, inf.Direction.VERTICAL);
+	test.strictEqual(root.children[0].children.length, 3);
+
+	test.strictEqual(root.children[0].children[0].children.length, 3);
+	test.strictEqual(root.children[0].children[0].direction,
+					 inf.Direction.HORIZONTAL);
+	test.strictEqual(root.children[0].children[0].children[0].id, 'child1');
+	test.strictEqual(root.children[0].children[0].children[2].id, 'child2');
+	test.ok(util.lengthEquals(root.children[0].children[0].children[1].w,
+							  inf.px(10)));
+	test.ok(util.lengthEquals(root.children[0].children[0].children[1].h,
+							  inf.px(20)));
+
+	test.ok(util.lengthEquals(root.children[0].children[1].w, inf.px(50)));
+	test.ok(util.lengthEquals(root.children[0].children[1].h, inf.px(10)));
+
+	test.strictEqual(root.children[0].children[2].id, 'child3');
 
 	test.done();
 }

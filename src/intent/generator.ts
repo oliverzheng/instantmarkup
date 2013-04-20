@@ -16,8 +16,12 @@ export function arrayToIter(boxes: inf.Box[]): iter.BoxIter {
 
 /**
  * Iterate boxes by depth-first.
+ *
+ * @param root The root of the boxes to restrict depth first search to.
+ * @param first The first box under root to start. All boxes before that are
+ * discarded.
  */
-export function depthFirst(root: inf.Box): iter.BoxIter {
+export function depthFirst(root: inf.Box, first: inf.Box = null): iter.BoxIter {
 	var prevNode: inf.Box;
 
 	function getDeepest(box: inf.Box) {
@@ -29,7 +33,7 @@ export function depthFirst(root: inf.Box): iter.BoxIter {
 	return iter.makeIter(() => {
 		/* First time here */
 		if (!prevNode)
-			return prevNode = getDeepest(root);
+			return prevNode = first || getDeepest(root);
 
 		if (prevNode === root)
 			/* We are done iterating */

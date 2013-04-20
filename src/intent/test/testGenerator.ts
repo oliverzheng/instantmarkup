@@ -58,6 +58,14 @@ export function testDepthFirst(test) {
 	});
 	test.equal(it(), null);
 
+	var expectedIds = ['parent1', 'child2', 'parent2', 'root'];
+	var it = gen.depthFirst(root, root.children[0]);
+	expectedIds.forEach((id) => {
+		var box = it();
+		test.strictEqual(box.id, id);
+	});
+	test.equal(it(), null);
+
 	test.done();
 }
 

@@ -60,6 +60,38 @@ export function testOtherDirection(test) {
 	test.done();
 }
 
+export function testRectEmpty(test) {
+	test.equal(util.rectEmpty({
+		x: 0,
+		y: 0,
+		w: 0,
+		h: 10,
+	}), true);
+
+	test.equal(util.rectEmpty({
+		x: 0,
+		y: 0,
+		w: 10,
+		h: 0,
+	}), true);
+
+	test.equal(util.rectEmpty({
+		x: 0,
+		y: 0,
+		w: -1,
+		h: 0,
+	}), true);
+
+	test.equal(util.rectEmpty({
+		x: 0,
+		y: 0,
+		w: 1,
+		h: 1,
+	}), false);
+
+	test.done();
+}
+
 export function testRectContains(test) {
 	/* Complete equal containment */
 	test.equal(util.rectContains({

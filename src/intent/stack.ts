@@ -11,22 +11,104 @@ import util = module('./util');
 
 /**
  * A stack of boxes are horizontally or vertically aligned, and
- * non-overlapping.
+ * non-overlapping. They are also the top-most boxes, in that nothing is on top
+ * of them.
  */
 export class Stack {
 	layout: l.Layout;
 	boxes: inf.Box[];
+	gaps: inf.Box[];
 	direction: inf.Direction;
 
 	constructor(layout: l.Layout, direction: inf.Direction) {
+		this.layout = layout;
 		this.direction = direction;
 		this.boxes = [];
+		this.gaps = [];
 	}
 
 	removeBox(box: inf.Box) {
 		var index = this.boxes.indexOf(box);
 		if (index !== -1)
 			this.boxes.splice(index, 1);
+	}
+
+	/**
+	 * Parent all the boxes together.
+	 *
+	 * Because the boxes do not overlap, their z-order is defined by how they
+	 * are sorted by position. And because they are all on top in z-order, they
+	 * can be grouped together and placed on top of the layout.
+	 *
+	 * @param newParentId Id for the new parent.
+	 * @param behind The box to put the new parent behind. Defaults to the top.
+	 */
+	group(newParentId: string, behind?: inf.Box): inf.Box {
+		/* This will be the size of the parent. */
+		var bound = this.layout.getBoundingRect(this.boxes);
+		var parent: inf.Box = {
+			id: newParentId,
+			parent: this.layout.root,
+			w: inf.px(bound.w),
+			h: inf.px(bound.h),
+			absolute: {
+				l: inf.px(bound.x),
+				t: inf.px(bound.y),
+			},
+			direction: this.direction,
+			children: [],
+			generated: true,
+		};
+		if (behind) {
+			var newIndex = tree.indexOfChild(behind) + 1;
+			behind.parent.children.splice(newIndex, 0, parent);
+		} else {
+			this.layout.root.children.unshift(parent);
+		}
+
+		/* We must interleave a gap between each pair of children so they are
+		 * spaced correctly. */
+		var gapRects: inf.Rect[] = [];
+		var prevChild: inf.Box;
+		/* We must do two loops. The first is when children haven't been
+		 * changed, and gaps can be calculated accurately. */
+		this.boxes.forEach((child) => {
+			var gap: inf.Rect;
+			if (prevChild) {
+				gap = getGap(this.layout, prevChild, child, this.direction);
+				if (util.rectEmpty(gap))
+					gap = null;
+			}
+			gapRects.push(gap);
+			prevChild = child;
+		});
+
+		this.boxes.forEach((child, i) => {
+			var gap = gapRects[i];
+			if (gap) {
+				var gapChild: inf.Box = {
+					id: newParentId + '_gap_' + i,
+					parent: parent,
+					w: inf.px(gap.w),
+					h: inf.px(gap.h),
+					generated: true,
+				};
+				this.gaps.push(gapChild);
+				parent.children.push(gapChild);
+			}
+			/* We don't want to reparent. That maintains z-order and thus
+			 * children ordering. We want to construct our own z-ordering and
+			 * alignment here, because we know the boxes are sorted. */
+			tree.orphanBox(child);
+
+			child.parent = parent;
+			child.absolute = null;
+
+			parent.children.push(child);
+
+			prevChild = child;
+		});
+		return parent;
 	}
 }
 
@@ -81,7 +163,8 @@ export function getGap(layout: l.Layout, box1: inf.Box, box2: inf.Box,
  * a stack.
  *
  * @param layout Layout the boxes belong to.
- * @param boxes List of non-overlapping boxes.
+ * @param boxes List of non-overlapping boxes. Nothing must be on top of any of
+ * these boxes.
  * @return A list stacks, where each input box is in at most one of these
  * stacks.
  */
@@ -116,7 +199,7 @@ export function findStacks(layout: l.Layout, boxes: inf.Box[]): Stack[] {
 			 * the same position and if there is nothing between their gap. */
 			if (aligned(layout, prevBox, box, dir) &&
 				(gap = getGap(layout, prevBox, box, dir)) &&
-				!search.findWithin(layout, gap, true).any((between) => {
+				!search.findWithin(layout, gap, true, false).any((between) => {
 					var rect = layout.getRect(between);
 					/* Boxes in the gap must be smaller than the bound of
 					 * prevBox and box; otherwise, it's just background. */
@@ -188,4 +271,27 @@ export function findStacks(layout: l.Layout, boxes: inf.Box[]): Stack[] {
 		});
 	}
 	return keepStacks;
+}
+
+
+/* TODO: callback should be replaced with an iter when TS 0.9 drops with
+ * generic support. */
+export function applyStacks(layout: l.Layout, namePrefix: string,
+							callback: () => any) {
+	var count = 0;
+	var stacked: inf.Box[] = [];
+	var prevGroup: inf.Box;
+	while (true) {
+		var topMost = search.getTopMost(layout, layout.root, stacked).toArray();
+		var stacks = findStacks(layout, topMost);
+		if (stacks.length == 0)
+			return;
+
+		stacks.forEach((stack) => {
+			prevGroup = stack.group(namePrefix + '_' + count++, prevGroup);
+			stacked.push.apply(stacked, stack.boxes);
+			stacked.push.apply(stacked, stack.gaps);
+		});
+		callback();
+	}
 }

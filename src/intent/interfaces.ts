@@ -201,4 +201,11 @@ export interface Box {
 	};
 
 	children?: Box[];
+
+	/**
+	 * Whether or not this was created by this system.
+	 *
+	 * By default, this should be false, for boxes imported from a design.
+	 */
+	generated?: bool;
 }

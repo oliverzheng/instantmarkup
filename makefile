@@ -17,6 +17,7 @@ SOURCES=\
 	src/intent/stack.ts \
 	src/intent/tree.ts \
 	src/intent/util.ts \
+	src/intent/visualSnapshot.ts \
 	src/intent/test/testGenerator.ts \
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
@@ -24,6 +25,7 @@ SOURCES=\
 	src/intent/test/testStack.ts \
 	src/intent/test/testTree.ts \
 	src/intent/test/testUtil.ts \
+	src/intent/test/testVisualSnapshot.ts \
 	src/test/testCoverage.ts \
 	src/test/testTestUtil.ts \
 	src/testUtil.ts \
@@ -67,7 +69,9 @@ coverage: instrument
 
 precheckin:
 	@echo Remove 'debugger' statements:
-	@grep -i -R --color debugger src || echo 'None found.'
+	@grep -i -R --color 'debugger' src || echo 'None found.'
+	@echo Remove 'console.log' statements:
+	@grep -i -R --color 'console.log' src || echo 'None found.'
 
 deps: node_modules
 
