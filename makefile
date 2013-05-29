@@ -13,6 +13,7 @@ SOURCES=\
 	src/intent/generator.ts \
 	src/intent/iterator.ts \
 	src/intent/layout.ts \
+	src/intent/operations.ts \
 	src/intent/partition.ts \
 	src/intent/search.ts \
 	src/intent/tree.ts \
@@ -21,6 +22,7 @@ SOURCES=\
 	src/intent/test/testGenerator.ts \
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
+	src/intent/test/testOperations.ts \
 	src/intent/test/testPartition.ts \
 	src/intent/test/testSearch.ts \
 	src/intent/test/testTree.ts \
