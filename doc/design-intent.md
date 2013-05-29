@@ -24,6 +24,24 @@ this:
 - Different browsers may require different HTML/CSS to achieve the same visual
   effect; having a canonical layout allows for different "markup translators".
 
+HTML rendering is suited for stacking and flowing siblings. Stacked siblings
+have display: (inline-)block. A stack of siblings have a direction, and the
+position of a container along that direction depends on its predecessor's
+position. Each container is a rectangle.
+
+Flowing siblings have display: inline. Inline elements are not necessarily
+rectangles, as their contents flow in multiple lines. For each inline element,
+there is a flowing direction. For each element inside the inline, its position
+along the flowing direction depends on that of its predecessor, like block
+elements. In addition, its position in the direction perpendicular to the
+flowing direction can also be specified. This is primarily used for text, where
+the width of a character is determined at runtime.
+
+The abstraction of the visual layout unifies the two. Each node in the tree may
+have children. There is a direction in which the children follow each other. In
+case of overflow, children may wrap. How children align within a wrapped line is
+specified in the parent container.
+
 The approach here is practical. There is a plethora of web designs that
 certainly contain design intentions not described here. In order to build the
 best intent discovery, the process will need to be iterative and incremental.
@@ -116,60 +134,23 @@ parent. An implied property of this is that each node has siblings. The goal is
 to find sibling and parent relationships. Here are examples of design elements
 and their design intent that heuristics must be able to extract.
 
-### Stack Siblings ###
 
-    +-----------+
-    |     A     |
-    +-----------+
-    +-----------+
-    |     B     |
-    +-----------+
+### Finding Siblings ###
 
-A and B are siblings.
+Given a non-overlapping list of boxes, siblings can be found by finding stacks
+of boxes. The algorithm entails two parts:
 
-Given that they are vertically stacked and share the same width (aligned
-together), and there is nothing between them (as that would detract from
-proximity), they present orthogonal data and belong on the same level of the
-information hierarchy.
+- Finding a stack: a stack of boxes have their left/right or top/bottom edges in
+  increasing positions.
+- Finding a divider: a list of boxes that are one stack must have a containment
+  relationship, assuming everything is composed of stacks. Thus, we need to find
+  the divider that separates the stacks. A divider is whitespace that goes from
+  edge to edge. This divider's area should be maximized.
 
-- Input: a list of boxes that do not overlay over each other, sorted from top to
-  bottom, left to right.
-- Output: a list of lists, each containing boxes that are siblings. There must
-  not be duplicate boxes.
+When the input list of boxes is a stack, then we've found the relationship.
+Otherwise, find dividers. For the divider(s) with the biggest area, split the
+list of boxes at these divisions and make them a stack of list of boxes.
 
-### Edge-contained Siblings (1) ###
-
-    +-----------+
-    |     A     |
-    +-----------+
-    . +-----+   .
-    . |  B  |   .
-    . +-----+   .
-
-A and B are siblings. Note that A and B are not aligned at the center.
-
-In this case, B is contained within the edge extensions of A. The two boxes are
-stacked (not quite evenly). If B had something to its right, then that's another
-case (described later).
-
-### Edge-contained Siblings (2) ###
-
-    +---+ . . .
-    | A |
-    +---+
-    .    +---+
-    .    | B |
-    .    +---+
-
-A and B are siblings. Here, the extension of A's top and left edges contain
-B and nothing else.
-
-In general, two boxes are siblings if their visual relationship is equal to each
-other, and there is no offset in balance, like another box interrupting their
-space.
-
-Note that when there is the possibility of stack siblings and edge-contained
-siblings, stack wins since it is visually stronger.
 
 ### Parent by Containment ###
 
@@ -181,22 +162,6 @@ siblings, stack wins since it is visually stronger.
     +-----------+
 
 A is B's parent.
-
-### Sibling-implied Parent ###
-
-    +-----+ +-----+
-    |  A  | |  B  |
-    +-----+ +-----+
-    +-------------+
-    |      C      |
-    +-------------+
-
-A and B are siblings; C is an uncle of A and B. A and B being siblings implies
-they share the same parent. This is really stack siblings applied twice; once
-with (A and B) and again with (parent of A and B, and C).
-
-Note this would also work if C was wider. Then C would be edge-contained
-siblings with the parent of A and B.
 
 ### Parent Decorations ###
 

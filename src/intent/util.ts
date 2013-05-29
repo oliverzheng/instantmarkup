@@ -5,6 +5,13 @@ import extutil = module('../extract/util')
 import inf = module('./interfaces')
 import tree = module('./tree')
 
+export function sortNumbers(numbers: number[]) {
+	/* Damn it JavaScript. Why is this not built in? Go home, you are drunk. */
+	numbers.sort((a, b) => {
+		return a - b;
+	});
+}
+
 export function layerToBox(rootLayer: extinf.Layer): inf.Box {
 	var root: inf.Box = {
 		id: rootLayer.id,
@@ -129,6 +136,43 @@ export function rectOverlaps(rect1: inf.Rect, rect2: inf.Rect): bool {
 	);
 
 	return horizOverlap && vertOverlap;
+}
+
+/**
+ * Returns the area of a rect.
+ */
+export function rectArea(rect: inf.Rect): number {
+	return rect.w * rect.h;
+}
+
+/**
+ * Sort comparison function for the area of two rectangles. If both rectangles
+ * have zero area, the one with a longer side is bigger.
+ */
+export function rectCmpArea(rect1: inf.Rect, rect2: inf.Rect): number {
+	var rectArea1 = rectArea(rect1);
+	var rectArea2 = rectArea(rect2);
+	if (rectArea1 !== 0 && rectArea2 !== 0)
+		return rectArea1 - rectArea2;
+	else
+		return Math.max(rect1.w, rect1.h) - Math.max(rect2.w, rect2.h);
+}
+
+/**
+ * Given two rects that are aligned horizontally or vertically, get the rect
+ * that fills the gap between them.
+ */
+export function getRectBetween(rect1: inf.Rect, rect2: inf.Rect): inf.Rect {
+	var horizontal = [rect1.x, rect1.x + rect1.w, rect2.x, rect2.x + rect2.w];
+	var vertical = [rect1.y, rect1.y + rect1.h, rect2.y, rect2.y + rect2.h];
+	sortNumbers(horizontal);
+	sortNumbers(vertical);
+	return {
+		x: horizontal[1],
+		y: vertical[1],
+		w: horizontal[2] - horizontal[1],
+		h: vertical[2] - vertical[1],
+	};
 }
 
 /**

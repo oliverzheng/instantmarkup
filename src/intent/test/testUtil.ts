@@ -336,6 +336,52 @@ export function testRectOverlaps(test) {
 	test.done();
 }
 
+export function testGetRectBetween(test) {
+	var rect1 = {
+		x: 0,
+		y: 0,
+		w: 100,
+		h: 20,
+	};
+	var rect2 = {
+		x: 0,
+		y: 30,
+		w: 100,
+		h: 20,
+	};
+	var actual = util.getRectBetween(rect1, rect2);
+	var expected = {
+		x: 0,
+		y: 20,
+		h: 10,
+		w: 100,
+	};
+	testUtil.equals(test, actual, expected);
+
+	var rect1 = {
+		x: 0,
+		y: 0,
+		w: 20,
+		h: 100,
+	};
+	var rect2 = {
+		x: 30,
+		y: 0,
+		w: 20,
+		h: 100,
+	};
+	var actual = util.getRectBetween(rect1, rect2);
+	var expected = {
+		x: 20,
+		y: 0,
+		h: 100,
+		w: 10,
+	};
+	testUtil.equals(test, actual, expected);
+
+	test.done();
+}
+
 export function testGetBoundingRect(test) {
 	var rect = {
 		x: 0,
@@ -373,6 +419,56 @@ export function testGetBoundingRect(test) {
 	test.throws(() => {
 		util.getBoundingRect([]);
 	});
+
+	test.done();
+}
+
+export function testRectArea(test) {
+	var rect = {
+		w: 10,
+		h: 20,
+		x: 0,
+		y: 0,
+	};
+	test.strictEqual(util.rectArea(rect), 200);
+	test.done();
+}
+
+export function testRectCmpArea(test) {
+	var rect1 = {
+		w: 10,
+		h: 20,
+		x: 0,
+		y: 0,
+	};
+	var rect2 = {
+		w: 10,
+		h: 10,
+		x: 0,
+		y: 0,
+	}
+	var rect3 = {
+		w: 20,
+		h: 10,
+		x: 0,
+		y: 0,
+	}
+	var rect4 = {
+		w: 0,
+		h: 100,
+		x: 0,
+		y: 0,
+	};
+	var rect5 = {
+		w: 50,
+		h: 0,
+		x: 0,
+		y: 0,
+	};
+	test.strictEqual(util.rectCmpArea(rect1, rect2) > 0, true);
+	test.strictEqual(util.rectCmpArea(rect2, rect1) < 0, true);
+	test.strictEqual(util.rectCmpArea(rect1, rect3), 0);
+	test.strictEqual(util.rectCmpArea(rect4, rect5) > 0, true);
 
 	test.done();
 }

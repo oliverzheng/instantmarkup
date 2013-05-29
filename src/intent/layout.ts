@@ -201,7 +201,7 @@ export class Layout {
 			return parentComp * length.value;
 
 		/* If we are computing the cross direction length, don't use children */
-		var parentDir = parent.direction || inf.defaultDirection;
+		var parentDir = parent.direction || inf.noDirection;
 		var useOtherChildren = (
 			parentDir === inf.Direction.NONE ||
 			parentDir === dir
@@ -290,7 +290,7 @@ export class Layout {
 				throw 'Absolute must specify at least one of near or far';
 		}
 
-		var parentDir = parent.direction || inf.defaultDirection;
+		var parentDir = parent.direction || inf.noDirection;
 
 		/* All children are layered on top of each other */
 		if (parentDir === inf.Direction.NONE)

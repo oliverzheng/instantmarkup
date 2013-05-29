@@ -111,7 +111,9 @@ export enum Direction {
 	VERTICAL,
 }
 
-export var defaultDirection = Direction.NONE;
+export var noDirection = Direction.NONE;
+export var horiz = Direction.HORIZONTAL;
+export var vert = Direction.VERTICAL;
 
 
 /**

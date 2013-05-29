@@ -68,6 +68,22 @@ export function testFilter(test) {
 	test.done();
 }
 
+export function testAny(test) {
+	var it = gen.arrayToIter(boxes);
+	var a = it.any((box) => {
+		return box.id === '0'
+	});
+	test.strictEqual(a, true);
+
+	var it = gen.arrayToIter(boxes);
+	var a = it.any((box) => {
+		return box.id === '5';
+	});
+	test.strictEqual(a, false);
+
+	test.done();
+}
+
 export function testTake(test) {
 	var it = gen.arrayToIter(boxes).take(0);
 	test.strictEqual(it.toArray().length, 0);

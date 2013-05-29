@@ -53,8 +53,7 @@ export function getTopMost(layout: l.Layout, root: inf.Box,
  * @param layout The layout the boxes belong to.
  * @param boxes List of boxes to sort.
  * @param dir Direction to sort by.
- * @return A new list of the input boxes sorted by that direction. The other
- * direction is used as a tie breaker.
+ * @return A new list of the input boxes sorted by that direction.
  */
 export function sortByDirection(layout: l.Layout, boxes: inf.Box[],
 								dir: inf.Direction): inf.Box[] {
@@ -63,14 +62,7 @@ export function sortByDirection(layout: l.Layout, boxes: inf.Box[],
 		var posAbs1 = layout.compPositionAbs(box1, dir);
 		var posAbs2 = layout.compPositionAbs(box2, dir);
 		var diff = posAbs1 - posAbs2;
-		if (diff !== 0)
-			return diff;
-		else {
-			var otherDir = util.otherDirection(dir);
-			var crossPosAbs1 = layout.compPositionAbs(box1, otherDir);
-			var crossPosAbs2 = layout.compPositionAbs(box2, otherDir);
-			return crossPosAbs1 - crossPosAbs2;
-		}
+		return diff;
 	});
 	return sorted;
 }
