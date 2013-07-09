@@ -8,7 +8,7 @@ import search = module('./search');
 import util = module('./util');
 import l = module('./layout');
 
-export class VisualSnapshot {
+export class Snapshot {
 	/* A map from box to rect */
 	private rects: any;
 
@@ -32,16 +32,16 @@ export class VisualSnapshot {
 							.dropWhile((other) => {
 								return other !== box;
 							}).drop(1); /* The first is box. */
-			this.below.set(box, search.findWithin(layout, rect, true, true,
-												  below).toArray());
+			this.below.set(box, search.findTouching(layout, rect,
+													below).toArray());
 		});
 	}
 
 	equalsLayout(layout: l.Layout) {
-		return this.equals(new VisualSnapshot(layout));
+		return this.equals(new Snapshot(layout));
 	}
 
-	equals(other: VisualSnapshot) {
+	equals(other: Snapshot) {
 		if (this.rects.length !== other.rects.length)
 			return false;
 

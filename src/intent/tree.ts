@@ -53,22 +53,6 @@ export function hasUniqueIds(it: iter.BoxIter): bool {
 }
 
 /**
- * Remove a box from the tree.
- *
- * @return The box's original parent.
- */
-export function orphanBox(box: inf.Box): inf.Box {
-	var i = indexOfChild(box);
-	if (i !== -1) {
-		var parent = box.parent;
-		parent.children.splice(i, 1);
-		box.parent = null;
-		return parent;
-	}
-	return null;
-}
-
-/**
  * Whether or not a box is the ancestor of another. A box is its own ancestor.
  */
 export function isAncestor(ancestor: inf.Box, descendant: inf.Box): bool {
@@ -133,47 +117,4 @@ export function isBefore(first: inf.Box, second: inf.Box): bool {
 	}
 
 	return indexOfChild(first) < indexOfChild(second);
-}
-
-/**
- * Repath box to be under another parent. Relative z-order is maintained.
- *
- * @param box Box to reparent.
- * @param parent Box to be the new parent.
- * @return The original parent of the box.
- */
-export function reparent(box: inf.Box, parent: inf.Box): inf.Box {
-	if (isAncestor(box, parent))
-		throw 'A box cannot be reparented to its descendant.';
-
-	if (parent === box.parent)
-		return parent;
-
-	if (!parent.children)
-		parent.children = [];
-	var oldParent = box.parent;
-
-	if (isAncestor(parent, box)) {
-		var child = box;
-		while (child.parent !== parent)
-			child = child.parent;
-
-		orphanBox(box);
-
-		parent.children.splice(indexOfChild(child), 0, box);
-
-	} else {
-		var before = isBefore(box, parent);
-
-		orphanBox(box);
-
-		if (before)
-			parent.children.unshift(box);
-		else
-			parent.children.push(box);
-	}
-
-	box.parent = parent;
-
-	return oldParent;
 }

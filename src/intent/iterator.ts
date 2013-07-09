@@ -10,6 +10,7 @@ export interface BoxIter {
 	forEach: (callback: (box: inf.Box, i: number) => any) => void;
 	filter: (condition: (box: inf.Box) => bool) => BoxIter;
 	any: (condition?: (box: inf.Box) => bool) => bool;
+	not: (box: inf.Box) => BoxIter;
 	take: (count: number) => BoxIter;
 	takeWhile: (condition: (box: inf.Box) => bool) => BoxIter;
 	drop: (count: number) => BoxIter;
@@ -40,6 +41,10 @@ export function makeIter(gen: () => inf.Box): BoxIter {
 
 	iter.any = (condition: (box: inf.Box) => bool) => {
 		return any(iter, condition);
+	};
+
+	iter.not = (box: inf.Box) => {
+		return not(iter, box);
 	};
 
 	iter.take = (count: number) => {
@@ -109,6 +114,15 @@ export function filter(iter: BoxIter,
  */
 export function any(iter: BoxIter, condition?: (box: inf.Box) => bool): bool {
 	return first(iter, condition) != null;
+}
+
+/**
+ * Returns a new iterator that's all boxes but one.
+ */
+export function not(iter: BoxIter, box: inf.Box): BoxIter {
+	return filter(iter, (b) => {
+		return b !== box;
+	});
 }
 
 /**

@@ -261,11 +261,11 @@ export function partitionChildren(layout: l.Layout, box: inf.Box,
 			return;
 		}
 		var rectBetween = util.getRectBetween(prevRect, rect);
-		var it = search.findWithin(layout, rectBetween, false, false,
+		var it = search.findWithin(layout, rectBetween,
 								   gen.arrayToIter(box.children));
 
-		var g = op.groupBoxes(layout, it.toArray(),
-							  idPrefix + '-partition-' + i);
+		var g = op.groupChildren(layout, it.toArray(),
+								 idPrefix + '-partition-' + i);
 		if (g)
 			newGroups.push(g);
 		prevRect = rect;

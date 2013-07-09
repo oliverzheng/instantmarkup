@@ -5,7 +5,7 @@ import l = module('../layout');
 import partition = module('../partition');
 import tree = module('../tree');
 import util = module('../util');
-import vs = module('../visualSnapshot');
+import ss = module('../snapshot');
 import testUtil = module('../../testUtil');
 
 /* Remove an empty range from a range */
@@ -241,7 +241,7 @@ export function testPartitionEmpty(test) {
 		h: inf.px(100),
 	};
 	var layout = new l.Layout(root);
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var actual = partition.partitionChildren(layout, root, '');
 	var expected = [];
@@ -263,7 +263,7 @@ export function testPartitionSingle(test) {
 	};
 	tree.refreshParents(root);
 	var layout = new l.Layout(root);
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var actual = partition.partitionChildren(layout, root, '');
 	var expected = [];
@@ -289,7 +289,7 @@ export function testPartitionStackedAlready(test) {
 	};
 	tree.refreshParents(root);
 	var layout = new l.Layout(root);
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var groups = partition.partitionChildren(layout, root, 'group');
 	test.strictEqual(groups.length, 0);
@@ -339,7 +339,7 @@ export function testPartitionStackVertNoGaps(test) {
 	var box2 = root.children[1];
 	var box3 = root.children[2];
 	var box4 = root.children[3];
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var groups = partition.partitionChildren(layout, root, 'group');
 	test.strictEqual(groups.length, 1);
@@ -408,7 +408,7 @@ export function testPartitionStackHorizNoGaps(test) {
 	var box2 = root.children[1];
 	var box3 = root.children[2];
 	var box4 = root.children[3];
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var groups = partition.partitionChildren(layout, root, 'group');
 	test.strictEqual(groups.length, 1);
@@ -477,7 +477,7 @@ export function testPartitionStackGaps(test) {
 	var box2 = root.children[1];
 	var box3 = root.children[2];
 	var box4 = root.children[3];
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var groups = partition.partitionChildren(layout, root, 'group');
 	test.strictEqual(groups.length, 1);
@@ -563,7 +563,7 @@ export function testPartitionHorizVert(test) {
 	var box4 = root.children[3];
 	var box5 = root.children[4];
 	var box6 = root.children[5];
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var groups = partition.partitionChildren(layout, root, 'group');
 	test.strictEqual(groups.length, 2);
@@ -628,7 +628,7 @@ export function testPartitionMultiple(test) {
 	var box2 = root.children[1];
 	var box3 = root.children[2];
 	var box4 = root.children[3];
-	var snapshot = new vs.VisualSnapshot(layout);
+	var snapshot = new ss.Snapshot(layout);
 
 	var groups = partition.partition(layout, root, 'group');
 	test.strictEqual(groups.length, 1);

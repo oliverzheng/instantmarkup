@@ -9,6 +9,7 @@ SOURCES=\
 	src/extract/util.ts \
 	src/extract/test/testPsd.ts \
 	src/extract/test/testUtil.ts \
+	src/intent/containment.ts \
 	src/intent/interfaces.ts \
 	src/intent/generator.ts \
 	src/intent/iterator.ts \
@@ -18,7 +19,8 @@ SOURCES=\
 	src/intent/search.ts \
 	src/intent/tree.ts \
 	src/intent/util.ts \
-	src/intent/visualSnapshot.ts \
+	src/intent/snapshot.ts \
+	src/intent/test/testContainment.ts \
 	src/intent/test/testGenerator.ts \
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
@@ -27,7 +29,7 @@ SOURCES=\
 	src/intent/test/testSearch.ts \
 	src/intent/test/testTree.ts \
 	src/intent/test/testUtil.ts \
-	src/intent/test/testVisualSnapshot.ts \
+	src/intent/test/testSnapshot.ts \
 	src/test/testCoverage.ts \
 	src/test/testTestUtil.ts \
 	src/testUtil.ts \

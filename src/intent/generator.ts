@@ -30,10 +30,13 @@ export function depthFirst(root: inf.Box, first: inf.Box = null): iter.BoxIter {
 		return box;
 	}
 
+	if (!first)
+		first = getDeepest(root);
+
 	return iter.makeIter(() => {
 		/* First time here */
 		if (!prevNode)
-			return prevNode = first || getDeepest(root);
+			return prevNode = first;
 
 		if (prevNode === root)
 			/* We are done iterating */
@@ -46,5 +49,51 @@ export function depthFirst(root: inf.Box, first: inf.Box = null): iter.BoxIter {
 			return prevNode = getDeepest(siblings[nextIndex]);
 		else
 			return prevNode = parent;
+	});
+}
+
+/**
+ * Iter for depthFirst in reverse order. I.e. bottom up.
+ */
+export function reverseDepthFirst(root: inf.Box,
+								  first: inf.Box = null): iter.BoxIter {
+	var prevNode: inf.Box;
+
+	function getDeepest(box: inf.Box) {
+		while ((box.children || []).length > 0)
+			box = box.children[0];
+		return box;
+	}
+
+	if (!first)
+		first = root;
+
+	var last = getDeepest(root);
+
+	return iter.makeIter(() => {
+		/* First time here */
+		if (!prevNode)
+			return prevNode = first;
+
+		if (prevNode === last)
+			/* We are done iterating */
+			return null;
+
+		var children = prevNode.children || [];
+		if (children.length > 0)
+			return prevNode = children[children.length - 1];
+
+		var parent = prevNode.parent;
+		var prev = prevNode;
+		while (parent) {
+			var siblings = parent.children;
+			var nextIndex = siblings.indexOf(prev) - 1;
+			if (nextIndex >= 0)
+				return prevNode = siblings[nextIndex];
+			else {
+				prev = parent;
+				parent = parent.parent;
+			}
+		}
 	});
 }

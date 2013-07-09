@@ -203,3 +203,21 @@ export function getBoundingRect(rects: inf.Rect[]): inf.Rect {
 	}
 	return bound;
 }
+
+/**
+ * Whether or not this box is rendered with any content, including bitmaps,
+ * gradients, text, etc.
+ */
+export function hasContent(box: inf.Box): bool {
+	return !box.generated;
+}
+
+/**
+ * Returns box1 - box2.
+ */
+export function rectOffset(rect1: inf.Rect, rect2: inf.Rect): inf.Position {
+	return {
+		x: rect1.x - rect2.x,
+		y: rect1.y - rect2.y,
+	};
+}

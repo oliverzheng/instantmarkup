@@ -3,7 +3,7 @@
 import inf = module('../interfaces');
 import tree = module('../tree');
 import l = module('../layout');
-import vs = module('../visualSnapshot');
+import ss = module('../snapshot');
 
 export function setUp(cb) {
 	this.root = {
@@ -33,7 +33,7 @@ export function setUp(cb) {
 	tree.refreshParents(this.root);
 
 	this.layout = new l.Layout(this.root);
-	this.snapshot = new vs.VisualSnapshot(this.layout);
+	this.snapshot = new ss.Snapshot(this.layout);
 
 	cb();
 }

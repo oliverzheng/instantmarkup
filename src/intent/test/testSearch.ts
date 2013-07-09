@@ -184,7 +184,7 @@ export function testSortByDirection(test) {
 	test.done();
 }
 
-export function testFindWithin(test) {
+export function testFindContainment(test) {
 	var root: inf.Box = {
 		id: 'root',
 		w: inf.px(100),
@@ -207,10 +207,12 @@ export function testFindWithin(test) {
 	tree.refreshParents(root);
 	var l = new layout.Layout(root);
 
-	function expect(rect: inf.Rect, partial: bool, contained: bool,
+	function expect(rect: inf.Rect,
+					within: bool, partial: bool, contained: bool,
 					expected: string[]) {
 		var ids: string[] = [];
-		search.findWithin(l, rect, partial, contained).forEach((box) => {
+		search.findContainment(l, rect,
+							   within, partial, contained).forEach((box) => {
 			ids.push(box.id);
 		});
 		testUtil.equals(test, expected, ids);
@@ -222,10 +224,14 @@ export function testFindWithin(test) {
 		w: 20,
 		h: 20,
 	};
-	expect(rect, false, false, ['1']);
-	expect(rect, true, false, ['1', 'root']);
-	expect(rect, false, true, ['1', 'root']);
-	expect(rect, true, true, ['1', 'root']);
+	expect(rect, false, false, false, []);
+	expect(rect, false, false, true, ['1', 'root']);
+	expect(rect, false, true, false, []);
+	expect(rect, false, true, true, ['1', 'root']);
+	expect(rect, true, false, false, ['1']);
+	expect(rect, true, false, true, ['1', 'root']);
+	expect(rect, true, true, false, ['1']);
+	expect(rect, true, true, true, ['1', 'root']);
 
 	var rect = {
 		x: 0,
@@ -233,10 +239,14 @@ export function testFindWithin(test) {
 		w: 30,
 		h: 30,
 	};
-	expect(rect, false, false, ['1']);
-	expect(rect, true, false, ['1', '2', 'root']);
-	expect(rect, false, true, ['1', 'root']);
-	expect(rect, true, true, ['1', '2', 'root']);
+	expect(rect, false, false, false, []);
+	expect(rect, false, false, true, ['root']);
+	expect(rect, false, true, false, ['2']);
+	expect(rect, false, true, true, ['2', 'root']);
+	expect(rect, true, false, false, ['1']);
+	expect(rect, true, false, true, ['1', 'root']);
+	expect(rect, true, true, false, ['1', '2']);
+	expect(rect, true, true, true, ['1', '2', 'root']);
 
 	var rect = {
 		x: 0,
@@ -244,10 +254,14 @@ export function testFindWithin(test) {
 		w: 10,
 		h: 10,
 	};
-	expect(rect, false, false, []);
-	expect(rect, true, false, ['2', 'root']);
-	expect(rect, false, true, ['2', 'root']);
-	expect(rect, true, true, ['2', 'root']);
+	expect(rect, false, false, false, []);
+	expect(rect, false, false, true, ['2', 'root']);
+	expect(rect, false, true, false, []);
+	expect(rect, false, true, true, ['2', 'root']);
+	expect(rect, true, false, false, []);
+	expect(rect, true, false, true, ['2', 'root']);
+	expect(rect, true, true, false, []);
+	expect(rect, true, true, true, ['2', 'root']);
 
 	var rect = {
 		x: 5,
@@ -255,10 +269,14 @@ export function testFindWithin(test) {
 		w: 5,
 		h: 5,
 	};
-	expect(rect, false, false, []);
-	expect(rect, true, false, []);
-	expect(rect, false, true, ['2', 'root']);
-	expect(rect, true, true, ['2', 'root']);
+	expect(rect, false, false, false, []);
+	expect(rect, false, false, true, ['2', 'root']);
+	expect(rect, false, true, false, []);
+	expect(rect, false, true, true, ['2', 'root']);
+	expect(rect, true, false, false, []);
+	expect(rect, true, false, true, ['2', 'root']);
+	expect(rect, true, true, false, []);
+	expect(rect, true, true, true, ['2', 'root']);
 
 	var rect = {
 		x: 0,
@@ -266,15 +284,14 @@ export function testFindWithin(test) {
 		w: 20,
 		h: 60,
 	};
-	var ids: string[] = [];
-	var it = gen.depthFirst(l.root).filter((box) => {
-		return box.id !== '2';
-	});
-	search.findWithin(l, rect, true, true, it).forEach((box) => {
-		ids.push(box.id);
-	});
-	var expected = ['1', '3', 'root'];
-	testUtil.equals(test, expected, ids);
+	expect(rect, false, false, false, []);
+	expect(rect, false, false, true, ['root']);
+	expect(rect, false, true, false, []);
+	expect(rect, false, true, true, ['root']);
+	expect(rect, true, false, false, ['1', '2', '3']);
+	expect(rect, true, false, true, ['1', '2', '3', 'root']);
+	expect(rect, true, true, false, ['1', '2', '3']);
+	expect(rect, true, true, true, ['1', '2', '3', 'root']);
 
 	test.done();
 }

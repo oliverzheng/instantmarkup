@@ -70,15 +70,17 @@ export function sortByDirection(layout: l.Layout, boxes: inf.Box[],
 /**
  * @param layout The layout to look within.
  * @param rect The bounding rectangle to search boxes within.
+ * @param within If boxes that are completely contained within should be
+ * included.
  * @param partial If boxes that overlap partial edges should be included.
  * @param contained If boxes that contain the rect completely should be
  * included.
  * @param it The iterator to use. Defaults to depthFirst on layout.root.
  * @return Iterator of boxes that are contained within rect.
  */
-export function findWithin(layout: l.Layout, rect: inf.Rect,
-						   partial: bool, contained: bool,
-						   it?: iter.BoxIter): iter.BoxIter {
+export function findContainment(layout: l.Layout, rect: inf.Rect,
+								within: bool, partial: bool, contained: bool,
+								it?: iter.BoxIter): iter.BoxIter {
 	if (!it)
 		it = gen.depthFirst(layout.root);
 
@@ -88,12 +90,37 @@ export function findWithin(layout: l.Layout, rect: inf.Rect,
 		if (contained && util.rectContains(boxRect, rect))
 			return true;
 
+		if (within && util.rectContains(rect, boxRect))
+			return true;
+
 		if (partial)
-			/* We do not want boxes that contain the specified rect. */
+			/* We do not want boxes that contain the specified rect or boxes
+			 * that are contained by the rect. */
 			return (util.rectOverlaps(boxRect, rect) &&
-					(util.rectEquals(boxRect, rect) ||
-					 !util.rectBiggerThan(boxRect, rect)));
-		else
-			return util.rectContains(rect, boxRect);
+					!util.rectEquals(boxRect, rect) &&
+					!util.rectContains(boxRect, rect) &&
+					!util.rectContains(rect, boxRect));
+
+		return false;
 	});
+}
+
+export function findWithin(layout: l.Layout, rect: inf.Rect,
+						   it?: iter.BoxIter): iter.BoxIter {
+	return findContainment(layout, rect, true, false, false, it);
+}
+
+export function findTouching(layout: l.Layout, rect: inf.Rect,
+							 it?: iter.BoxIter): iter.BoxIter {
+	return findContainment(layout, rect, true, true, true, it);
+}
+
+export function findOverlap(layout: l.Layout, rect: inf.Rect,
+							it?: iter.BoxIter): iter.BoxIter {
+	return findContainment(layout, rect, false, true, false, it);
+}
+
+export function findContainer(layout: l.Layout, rect: inf.Rect,
+							  it?: iter.BoxIter): iter.BoxIter {
+	return findContainment(layout, rect, false, false, true, it);
 }

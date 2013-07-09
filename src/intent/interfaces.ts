@@ -138,12 +138,15 @@ export enum Alignment {
 export var defaultAlignment = Alignment.NEAR;
 
 
+export interface Position {
+	x: number;
+	y: number;
+}
+
 /**
  * Rectangle measured in absolute pixels.
  */
-export interface Rect {
-	x: number;
-	y: number;
+export interface Rect extends Position {
 	w: number;
 	h: number;
 }

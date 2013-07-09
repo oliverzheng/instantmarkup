@@ -5,18 +5,6 @@ import tree = module('../tree');
 import gen = module('../generator');
 import testUtil = module('../../testUtil');
 
-function getStructure(box: inf.Box) {
-	if (box.children && box.children.length > 0) {
-		var obj = {};
-		obj[box.id] = box.children.map((child) => {
-			return getStructure(child);
-		});
-		return obj;
-	} else {
-		return box.id;
-	}
-}
-
 export function setUp(callback) {
 	this.root = {
 		id: 'root',
@@ -102,19 +90,6 @@ export function testHasUniqueIds(test) {
 	test.done();
 }
 
-export function testOrphanBox(test) {
-	var child1 = tree.getBoxById(this.root, 'child1');
-	var parent = child1.parent;
-	test.strictEqual(tree.orphanBox(child1), parent);
-
-	test.equal(child1.parent, null);
-	test.strictEqual(parent.children.length, 0);
-
-	test.equal(tree.orphanBox({}), null);
-
-	test.done();
-}
-
 export function testIsAncestor(test) {
 	test.ok(tree.isAncestor(this.root, this.child1));
 	test.ok(tree.isAncestor(this.parent1, this.child1));
@@ -177,116 +152,6 @@ export function testIsBefore(test) {
 
 	test.ok(!tree.isBefore(this.root, null));
 	test.ok(!tree.isBefore(null, this.root));
-
-	test.done();
-}
-
-export function testReparentSame(test) {
-	var structure = getStructure(this.root);
-
-	test.strictEqual(tree.reparent(this.child1, this.parent1), this.parent1);
-	testUtil.equals(test, structure, getStructure(this.root));
-
-	test.done();
-}
-
-export function testReparentBefore1(test) {
-	test.strictEqual(tree.reparent(this.child1, this.root), this.parent1);
-	testUtil.equals(test, getStructure(this.root), {
-		'root': <any[]>[ // Wow #thisIsUgly.
-			'child1',
-			'parent1',
-			{parent2: [
-				'child2'
-			]}
-		]
-	});
-
-	test.done();
-}
-
-export function testReparentBefore2(test) {
-	test.strictEqual(tree.reparent(this.child1, this.parent2), this.parent1);
-	testUtil.equals(test, getStructure(this.root), {
-		'root': <any[]>[
-			'parent1',
-			{parent2: [
-				'child1',
-				'child2'
-			]}
-		]
-	});
-
-	test.done();
-}
-
-export function testReparentBefore3(test) {
-	test.strictEqual(tree.reparent(this.parent1, this.parent2), this.root);
-	testUtil.equals(test, getStructure(this.root), {
-		'root': [
-			{parent2: <any[]>[
-				{'parent1': [
-					'child1',
-				]},
-				'child2'
-			]}
-		]
-	});
-
-	test.done();
-}
-
-export function testReparentBefore4(test) {
-	test.strictEqual(tree.reparent(this.child2, this.root), this.parent2);
-	testUtil.equals(test, getStructure(this.root), {
-		'root': <any[]>[
-			{'parent1': [
-				'child1',
-			]},
-			'child2',
-			'parent2'
-		]
-	});
-
-	test.done();
-}
-
-export function testReparentBefore5(test) {
-	test.strictEqual(tree.reparent(this.child1, this.child2), this.parent1);
-	testUtil.equals(test, getStructure(this.root), {
-		'root': <any[]>[
-			'parent1',
-			{'parent2': [
-				{'child2': [
-					'child1'
-				]}
-			]},
-		]
-	});
-
-	test.done();
-}
-
-export function testReparentAfter(test) {
-	test.strictEqual(tree.reparent(this.child2, this.parent1), this.parent2);
-	testUtil.equals(test, getStructure(this.root), {
-		'root': <any[]>[
-			{'parent1': [
-				'child1',
-				'child2',
-			]},
-			'parent2',
-		]
-	});
-
-	test.done();
-}
-
-
-export function testReparentOwnChild(test) {
-	test.throws(() => {
-		tree.reparent(this.parent1, this.child1);
-	});
 
 	test.done();
 }
