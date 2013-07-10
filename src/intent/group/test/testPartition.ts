@@ -1,12 +1,12 @@
-/// <reference path="../../../_typings.d.ts" />
+/// <reference path="../../../../_typings.d.ts" />
 
-import inf = module('../interfaces');
-import l = module('../layout');
+import inf = module('../../interfaces');
+import l = module('../../layout');
+import tree = module('../../tree');
+import util = module('../../util');
+import ss = module('../../snapshot');
+import testUtil = module('../../../testUtil');
 import partition = module('../partition');
-import tree = module('../tree');
-import util = module('../util');
-import ss = module('../snapshot');
-import testUtil = module('../../testUtil');
 
 /* Remove an empty range from a range */
 export function testRangesEmptyRange(test) {

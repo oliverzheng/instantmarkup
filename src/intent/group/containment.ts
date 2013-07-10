@@ -1,14 +1,14 @@
-/// <reference path ="../../_typings.d.ts" />
+/// <reference path ="../../../_typings.d.ts" />
 
 import _ = module('underscore');
 
-import inf = module('./interfaces');
-import l = module('./layout');
-import search = module('./search');
-import gen = module('./generator');
-import util = module('./util');
-import tree = module('./tree');
-import op = module('./operations');
+import inf = module('../interfaces');
+import l = module('../layout');
+import search = module('../search');
+import gen = module('../generator');
+import util = module('../util');
+import tree = module('../tree');
+import op = module('../operations');
 
 /* The goal here is to group boxes into layers of non-overlapping boxes, which
  * will then get processed by partitioning. The heuristic here tries to maximize

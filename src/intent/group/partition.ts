@@ -1,13 +1,13 @@
-/// <reference path ="../../_typings.d.ts" />
+/// <reference path ="../../../_typings.d.ts" />
 
 import _ = module('underscore');
 
-import inf = module('./interfaces');
-import l = module('./layout');
-import gen = module('./generator');
-import search = module('./search');
-import op = module('./operations');
-import util = module('./util');
+import inf = module('../interfaces');
+import l = module('../layout');
+import gen = module('../generator');
+import search = module('../search');
+import op = module('../operations');
+import util = module('../util');
 
 /* Near may equal to far. The range becomes an empty range then. */
 export interface Range {

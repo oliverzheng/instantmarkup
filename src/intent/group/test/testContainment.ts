@@ -1,12 +1,12 @@
-/// <reference path="../../../_typings.d.ts" />
+/// <reference path="../../../../_typings.d.ts" />
 
-import inf = module('../interfaces');
-import tree = module('../tree');
-import l = module('../layout');
-import gen = module('../generator');
-import testUtil = module('../../testUtil');
+import inf = module('../../interfaces');
+import tree = module('../../tree');
+import l = module('../../layout');
+import gen = module('../../generator');
+import testUtil = module('../../../testUtil');
+import ss = module('../../snapshot');
 import contain = module('../containment');
-import ss = module('../snapshot');
 
 export function testContainmentSingleAbove(test) {
 	var root: inf.Box = {

@@ -9,27 +9,27 @@ SOURCES=\
 	src/extract/util.ts \
 	src/extract/test/testPsd.ts \
 	src/extract/test/testUtil.ts \
-	src/intent/containment.ts \
 	src/intent/interfaces.ts \
 	src/intent/generator.ts \
 	src/intent/iterator.ts \
 	src/intent/layout.ts \
 	src/intent/operations.ts \
-	src/intent/partition.ts \
 	src/intent/search.ts \
 	src/intent/tree.ts \
 	src/intent/util.ts \
 	src/intent/snapshot.ts \
-	src/intent/test/testContainment.ts \
 	src/intent/test/testGenerator.ts \
 	src/intent/test/testIterator.ts \
 	src/intent/test/testLayout.ts \
 	src/intent/test/testOperations.ts \
-	src/intent/test/testPartition.ts \
 	src/intent/test/testSearch.ts \
 	src/intent/test/testTree.ts \
 	src/intent/test/testUtil.ts \
 	src/intent/test/testSnapshot.ts \
+	src/intent/group/containment.ts \
+	src/intent/group/partition.ts \
+	src/intent/group/test/testContainment.ts \
+	src/intent/group/test/testPartition.ts \
 	src/test/testCoverage.ts \
 	src/test/testTestUtil.ts \
 	src/testUtil.ts \
