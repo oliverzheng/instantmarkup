@@ -7,8 +7,6 @@ SOURCES=\
 	src/extract/interfaces.ts \
 	src/extract/psd.ts \
 	src/extract/util.ts \
-	src/extract/test/testPsd.ts \
-	src/extract/test/testUtil.ts \
 	src/intent/interfaces.ts \
 	src/intent/generator.ts \
 	src/intent/iterator.ts \

@@ -5,7 +5,7 @@ import gen = module('../generator');
 import tree = module('../tree');
 import testutil = module('../../testUtil');
 
-export function testArrayToIter(test) {
+export function testFromArray(test) {
 	var array: inf.Box[] = [{
 		id: '1'
 	}, {
@@ -14,11 +14,11 @@ export function testArrayToIter(test) {
 		id: '3'
 	}];
 
-	var it = gen.arrayToIter(array);
+	var it = gen.fromArray(array);
 	var expected = ['1', '2', '3'];
 	var ids: string[] = [];
 	var box: inf.Box;
-	while (box = it())
+	while (box = it.next())
 		ids.push(box.id);
 
 	testutil.equals(test, expected, ids);
@@ -53,34 +53,34 @@ export function testDepthFirst(test) {
 	var expectedIds = ['child1', 'parent1', 'child2', 'parent2', 'root'];
 	var it = gen.depthFirst(root);
 	expectedIds.forEach((id) => {
-		var box = it();
+		var box = it.next();
 		test.strictEqual(box.id, id);
 	});
-	test.equal(it(), null);
+	test.equal(it.next(), null);
 
 	expectedIds.reverse();
 	var reverseIt = gen.reverseDepthFirst(root);
 	expectedIds.forEach((id) => {
-		var box = reverseIt();
+		var box = reverseIt.next();
 		test.strictEqual(box.id, id);
 	});
-	test.equal(it(), null);
+	test.equal(it.next(), null);
 
 	var expectedIds = ['parent1', 'child2', 'parent2', 'root'];
 	var it = gen.depthFirst(root, root.children[0]);
 	expectedIds.forEach((id) => {
-		var box = it();
+		var box = it.next();
 		test.strictEqual(box.id, id);
 	});
-	test.equal(it(), null);
+	test.equal(it.next(), null);
 
 	expectedIds.reverse();
 	var reverseIt = gen.reverseDepthFirst(root);
 	expectedIds.forEach((id) => {
-		var box = reverseIt();
+		var box = reverseIt.next();
 		test.strictEqual(box.id, id);
 	});
-	test.equal(it(), null);
+	test.equal(it.next(), null);
 
 	test.done();
 }

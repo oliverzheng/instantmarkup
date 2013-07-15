@@ -6,94 +6,141 @@ import iter = module('./iterator')
 /**
  * Turn an array into an iterator.
  */
-export function arrayToIter(boxes: inf.Box[]): iter.BoxIter {
-	var i = 0;
-	return iter.makeIter(() => {
-		if (i < boxes.length)
-			return boxes[i++];
-	});
+export class FromArray<T> extends iter.IterBase<T> {
+	private items: T[];
+	private i: number;
+
+	constructor(items: T[]) {
+		super();
+
+		this.items = items;
+		this.i = 0;
+	}
+
+	next(): T {
+		if (this.i < this.items.length)
+			return this.items[this.i++];
+	}
+
+	copy(): FromArray<T> {
+		return new FromArray(this.items);
+	}
+}
+
+export function fromArray<T>(items: T[]): FromArray<T> {
+	return new FromArray(items);
+}
+
+function getDeepest(box: inf.Box): inf.Box {
+	while ((box.children || []).length > 0)
+		box = box.children[0];
+	return box;
 }
 
 /**
  * Iterate boxes by depth-first.
  *
  * @param root The root of the boxes to restrict depth first search to.
- * @param first The first box under root to start. All boxes before that are
+ * @param start The first box under root to start. All boxes before that are
  * discarded.
  */
-export function depthFirst(root: inf.Box, first: inf.Box = null): iter.BoxIter {
-	var prevNode: inf.Box;
+export class DepthFirst extends iter.IterBase<inf.Box> {
+	private root: inf.Box;
+	private start: inf.Box;
+	private prev: inf.Box;
 
-	function getDeepest(box: inf.Box) {
-		while ((box.children || []).length > 0)
-			box = box.children[0];
-		return box;
+	constructor(root: inf.Box, start: inf.Box = null) {
+		super();
+
+		this.root = root;
+		this.start = start || getDeepest(root);
+		this.prev = null;
 	}
 
-	if (!first)
-		first = getDeepest(root);
-
-	return iter.makeIter(() => {
+	next(): inf.Box {
 		/* First time here */
-		if (!prevNode)
-			return prevNode = first;
+		if (!this.prev)
+			return this.prev = this.start;
 
-		if (prevNode === root)
+		if (this.prev === this.root)
 			/* We are done iterating */
 			return null;
 
-		var parent = prevNode.parent;
+		var parent = this.prev.parent;
 		var siblings = parent.children;
-		var nextIndex = siblings.indexOf(prevNode) + 1;
+		var nextIndex = siblings.indexOf(this.prev) + 1;
 		if (nextIndex < siblings.length)
-			return prevNode = getDeepest(siblings[nextIndex]);
+			return this.prev = getDeepest(siblings[nextIndex]);
 		else
-			return prevNode = parent;
-	});
+			return this.prev = parent;
+	}
+
+	copy(): DepthFirst {
+		var copy = new DepthFirst(this.root, this.prev);
+		if (this.prev)
+			copy.next(); /* We already iterated prev. */
+		return copy;
+	}
+}
+
+export function depthFirst(root: inf.Box, start: inf.Box = null): DepthFirst {
+	return new DepthFirst(root, start);
 }
 
 /**
  * Iter for depthFirst in reverse order. I.e. bottom up.
  */
-export function reverseDepthFirst(root: inf.Box,
-								  first: inf.Box = null): iter.BoxIter {
-	var prevNode: inf.Box;
+export class ReverseDepthFirst extends iter.IterBase<inf.Box> {
+	private root: inf.Box;
+	private start: inf.Box;
+	private prev: inf.Box;
+	private last: inf.Box;
 
-	function getDeepest(box: inf.Box) {
-		while ((box.children || []).length > 0)
-			box = box.children[0];
-		return box;
+	constructor(root: inf.Box, start: inf.Box = null) {
+		super();
+
+		this.root = root;
+		this.start = start || root;
+		this.last = getDeepest(root);
+		this.prev = null;
 	}
 
-	if (!first)
-		first = root;
-
-	var last = getDeepest(root);
-
-	return iter.makeIter(() => {
+	next(): inf.Box {
 		/* First time here */
-		if (!prevNode)
-			return prevNode = first;
+		if (!this.prev)
+			return this.prev = this.start;
 
-		if (prevNode === last)
+		if (this.prev === this.last)
 			/* We are done iterating */
 			return null;
 
-		var children = prevNode.children || [];
+		var children = this.prev.children || [];
 		if (children.length > 0)
-			return prevNode = children[children.length - 1];
+			return this.prev = children[children.length - 1];
 
-		var parent = prevNode.parent;
-		var prev = prevNode;
+		var parent = this.prev.parent;
+		var prevNode = this.prev;
 		while (parent) {
 			var siblings = parent.children;
-			var nextIndex = siblings.indexOf(prev) - 1;
+			var nextIndex = siblings.indexOf(prevNode) - 1;
 			if (nextIndex >= 0)
-				return prevNode = siblings[nextIndex];
+				return this.prev = siblings[nextIndex];
 			else {
-				prev = parent;
+				prevNode = parent;
 				parent = parent.parent;
 			}
 		}
-	});
+	}
+
+	copy(): ReverseDepthFirst {
+		var copy = new ReverseDepthFirst(this.root, this.prev);
+		if (this.prev)
+			copy.next(); /* We already iterated prev. */
+		return copy;
+	}
+}
+
+export function reverseDepthFirst(root: inf.Box,
+								  start: inf.Box = null): ReverseDepthFirst {
+	return new ReverseDepthFirst(root, start);
 }

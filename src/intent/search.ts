@@ -33,7 +33,7 @@ export function getTopMost(layout: l.Layout, root: inf.Box,
 
 		var before: inf.Box;
 		var it = gen.depthFirst(root);
-		while (before = it()) {
+		while (before = it.next()) {
 			/* Only boxes before box can overlap box. Once we reach when before
 			 * is box, everything that follows must not overlap box. */
 			if (before === box)

@@ -2,184 +2,336 @@
 
 import inf = module('./interfaces')
 
-/** An iterator to get boxes. If returns null, iteration has stopped. */
-export interface BoxIter {
-	(): inf.Box;
-	toArray: () => inf.Box[];
-	first: (condition?: (box: inf.Box) => bool) => inf.Box;
-	forEach: (callback: (box: inf.Box, i: number) => any) => void;
-	filter: (condition: (box: inf.Box) => bool) => BoxIter;
-	any: (condition?: (box: inf.Box) => bool) => bool;
-	not: (box: inf.Box) => BoxIter;
-	take: (count: number) => BoxIter;
-	takeWhile: (condition: (box: inf.Box) => bool) => BoxIter;
-	drop: (count: number) => BoxIter;
-	dropWhile: (condition: (box: inf.Box) => bool) => BoxIter;
+/** An iterator to get objects. If returns null, iteration has stopped. */
+export interface Iter<T> {
+	next(): T;
+	copy(): Iter<T>;
+	toArray(): T[];
+	first(condition?: (obj: T) => bool): T;
+	forEach(callback: (obj: T, i: number) => any): void;
+	filter(condition: (obj: T) => bool): Iter<T>;
+	any(condition?: (obj: T) => bool): bool;
+	not(obj: T): Iter<T>;
+	map<U>(mapping: (obj: T) => U): Iter<U>;
+	take(count: number): Iter<T>;
+	takeWhile(condition: (obj: T) => bool): Iter<T>;
+	drop(count: number): Iter<T>;
+	dropWhile(condition: (obj: T) => bool): Iter<T>;
+	chain(other: Iter<T>): Iter<T>;
+	unique(): Iter<T>;
 }
 
-/**
- * Take a closure and turn it into an iterator by attaching necessary methods.
- */
-export function makeIter(gen: () => inf.Box): BoxIter {
-	var iter: any = gen;
-
-	iter.toArray = () => {
-		return toArray(iter);
-	};
-
-	iter.first = (condition: (box: inf.Box) => bool) => {
-		return first(iter, condition);
-	};
-
-	iter.forEach = (callback: (box: inf.Box, i: number) => any) => {
-		return forEach(iter, callback);
-	};
-
-	iter.filter = (condition: (box: inf.Box) => bool) => {
-		return filter(iter, condition);
-	};
-
-	iter.any = (condition: (box: inf.Box) => bool) => {
-		return any(iter, condition);
-	};
-
-	iter.not = (box: inf.Box) => {
-		return not(iter, box);
-	};
-
-	iter.take = (count: number) => {
-		return take(iter, count);
-	};
-
-	iter.takeWhile = (condition: (box: inf.Box) => bool) => {
-		return takeWhile(iter, condition);
-	};
-
-	iter.drop = (count: number) => {
-		return drop(iter, count);
-	};
-
-	iter.dropWhile = (condition: (box: inf.Box) => bool) => {
-		return dropWhile(iter, condition);
-	};
-
-	return iter;
+export interface BoxIter extends Iter<inf.Box> {
 }
 
-/**
- * Generate a list out of an iterator.
- */
-export function toArray(iter: BoxIter): inf.Box[] {
-	var array: inf.Box[] = [];
-	var box: inf.Box;
-	while (box = iter())
-		array.push(box);
-	return array;
+export class IterBase<T> implements Iter<T> {
+	next(): T {
+		debugger;
+		throw 'Next not implemented';
+		return null;
+	}
+
+	copy(): Iter<T> {
+		debugger;
+		throw 'Copy not implemented';
+		return null;
+	}
+
+	/**
+	 * Generate a list out of an iterator.
+	 */
+	toArray(): T[] {
+		var array: T[] = [];
+		var obj: T;
+		while (obj = this.next())
+			array.push(obj);
+		return array;
+	}
+
+	/**
+	 * Returns the first obj that matches a condition.
+	 */
+	first(condition?: (obj: T) => bool): T {
+		var obj: T;
+		while ((obj = this.next()) && condition && !condition(obj));
+		return obj;
+	}
+
+	/**
+	 * Iterates through all objects.
+	 */
+	forEach(callback: (obj: T, i: number) => any): void {
+		var obj: T;
+		var i = 0;
+		while (obj = this.next())
+			callback(obj, i++);
+	}
+
+	/**
+	 * Returns a new iterator that filters things.
+	 */
+	filter(condition: (obj: T) => bool): Iter<T> {
+		return new FilterIter(this.copy(), condition);
+	}
+
+	/**
+	 * Returns whether or not any obj in the iterator match the condition.
+	 */
+	any(condition?: (obj: T) => bool): bool {
+		return this.first(condition) != null;
+	}
+
+	/**
+	 * Returns a new iterator that's all objes but one.
+	 */
+	not(obj: T): Iter<T> {
+		return this.filter((o) => {
+			return o !== obj;
+		});
+	}
+
+	/**
+	 * Map iterator of one type to another type.
+	 */
+	map<U>(mapping: (obj: T) => U): Iter<U> {
+		return new MapIter(this.copy(), mapping);
+	}
+
+	/**
+	 * Take the first count of objes.
+	 */
+	take(count: number): Iter<T> {
+		return new TakeIter(this.copy(), count);
+	}
+
+	/**
+	 * Returns an iterator that produces as many objes as it can until condition
+	 * fails.
+	 */
+	takeWhile(condition: (obj: T) => bool): Iter<T> {
+		return new TakeWhileIter(this.copy(), condition);
+	}
+
+	/**
+	 * Drop the first count of objes.
+	 */
+	drop(count: number): Iter<T> {
+		return new DropIter(this.copy(), count);
+	}
+
+	/**
+	 * Returns an iterator that only starts producing objes when condition fails.
+	 */
+	dropWhile(condition: (obj: T) => bool): Iter<T> {
+		return new DropWhileIter(this.copy(), condition);
+	}
+
+	/**
+	 * Chain two iterators sequentially.
+	 */
+	chain(other: Iter<T>): Iter<T> {
+		return new ChainIter(this.copy(), other.copy());
+	}
+
+	/**
+	 * Filters out things that have already appeared.
+	 */
+	unique(): Iter<T> {
+		return new UniqueIter(this.copy());
+	}
 }
 
-/**
- * Returns the first box that matches a condition.
- */
-export function first(iter: BoxIter, condition?: (box: inf.Box) => bool): inf.Box {
-	var box: inf.Box;
-	while ((box = iter()) && condition && !condition(box));
-	return box;
+class FilterIter<T> extends IterBase<T> {
+	private it: Iter<T>;
+	private callback: (T) => bool;
+
+	constructor(it: Iter<T>, callback: (T) => bool) {
+		super();
+
+		this.it = it;
+		this.callback = callback;
+	}
+
+	next(): T {
+		var obj: T;
+		while ((obj = this.it.next()) && !this.callback(obj));
+		return obj;
+	}
+
+	copy(): FilterIter<T> {
+		return new FilterIter<T>(this.it.copy(), this.callback);
+	}
 }
 
-/**
- * Iterates through all boxes.
- */
-export function forEach(iter: BoxIter,
-						callback: (box: inf.Box, i: number) => any): void {
-	var box: inf.Box;
-	var i = 0;
-	while (box = iter())
-		callback(box, i++);
+class MapIter<T, U> extends IterBase<U> {
+	private it: Iter<T>;
+	private mapping: (T) => U;
+
+	constructor(it: Iter<T>, mapping: (T) => U) {
+		super();
+
+		this.it = it;
+		this.mapping = mapping;
+	}
+
+	next(): U {
+		var obj = this.it.next();
+		if (obj)
+			return this.mapping(obj);
+	}
+
+	copy(): MapIter<T, U> {
+		return new MapIter(this.it.copy(), this.mapping);
+	}
 }
 
-/**
- * Returns a new iterator that filters things.
- */
-export function filter(iter: BoxIter,
-					   condition: (box: inf.Box) => bool): BoxIter {
-	return makeIter(() => {
-		var box: inf.Box;
-		while ((box = iter()) && !condition(box));
-		return box;
-	});
-}
+class TakeIter<T> extends IterBase<T> {
+	private it: Iter<T>;
+	private count: number;
 
-/**
- * Returns whether or not any box in the iterator match the condition.
- */
-export function any(iter: BoxIter, condition?: (box: inf.Box) => bool): bool {
-	return first(iter, condition) != null;
-}
+	constructor(it: Iter<T>, count: number) {
+		super();
 
-/**
- * Returns a new iterator that's all boxes but one.
- */
-export function not(iter: BoxIter, box: inf.Box): BoxIter {
-	return filter(iter, (b) => {
-		return b !== box;
-	});
-}
+		this.it = it;
+		this.count = count;
+	}
 
-/**
- * Take the first count of boxes.
- */
-export function take(iter: BoxIter, count: number): BoxIter {
-	return makeIter(() => {
-		if (count > 0) {
-			count--;
-			return iter();
+	next(): T {
+		if (this.count > 0) {
+			this.count--;
+			return this.it.next();
 		}
-	});
+	}
+
+	copy(): TakeIter<T> {
+		return new TakeIter<T>(this.it.copy(), this.count);
+	}
 }
 
-/**
- * Returns an iterator that produces as many boxes as it can until condition
- * fails.
- */
-export function takeWhile(iter: BoxIter,
-						  condition: (box: inf.Box) => bool): BoxIter {
-	var take = true;
-	return makeIter(() => {
-		if (take) {
-			var box = iter();
-			if (box && condition(box))
-				return box;
+class TakeWhileIter<T> extends IterBase<T> {
+	private it: Iter<T>;
+	private condition: (T) => bool;
+	private stopped: bool;
+
+	constructor(it: Iter<T>, condition: (T) => bool) {
+		super();
+
+		this.it = it;
+		this.condition = condition;
+		this.stopped = false;
+	}
+
+	next(): T {
+		if (!this.stopped) {
+			var obj = this.it.next();
+			if (obj && this.condition(obj))
+				return obj;
 			else
-				take = false;
+				this.stopped = true;
 		}
-	});
+	}
+
+	copy(): TakeWhileIter<T> {
+		var copy = new TakeWhileIter<T>(this.it.copy(), this.condition);
+		copy.stopped = this.stopped;
+		return copy;
+	}
 }
 
-/**
- * Drop the first count of boxes.
- */
-export function drop(iter: BoxIter, count: number): BoxIter {
-	var drop = true;
-	return makeIter(() => {
-		if (drop) {
-			while (count-- > 0 && iter());
-			drop = false;
-		}
+class DropIter<T> extends IterBase<T> {
+	private it: Iter<T>;
+	private count: number;
 
-		return iter();
-	});
+	constructor(it: Iter<T>, count: number) {
+		super();
+
+		this.it = it;
+		this.count = count;
+	}
+
+	next(): T {
+		while (this.count > 0) {
+			this.count--;
+			this.next();
+		}
+		return this.it.next();
+	}
+
+	copy(): DropIter<T> {
+		return new DropIter<T>(this.it.copy(), this.count);
+	}
 }
 
-/**
- * Returns an iterator that only starts producing boxes when condition fails.
- */
-export function dropWhile(iter: BoxIter,
-						  condition: (box: inf.Box) => bool): BoxIter {
-	var drop = true;
-	return makeIter(() => {
-		var box: inf.Box;
-		while ((box = iter()) && drop && condition(box));
-		drop = false;
-		return box;
-	});
+class DropWhileIter<T> extends IterBase<T> {
+	private it: Iter<T>;
+	private condition: (T) => bool;
+	private started: bool;
+
+	constructor(it: Iter<T>, condition: (T) => bool) {
+		super();
+
+		this.it = it;
+		this.condition = condition;
+		this.started = false;
+	}
+
+	next(): T {
+		var obj: T;
+		while ((obj = this.it.next()) && !this.started && this.condition(obj));
+		this.started = true;
+		return obj;
+	}
+
+	copy(): DropWhileIter<T> {
+		var copy = new DropWhileIter<T>(this.it.copy(), this.condition);
+		copy.started = this.started;
+		return copy;
+	}
+}
+
+class ChainIter<T> extends IterBase<T> {
+	private one: Iter<T>;
+	private two: Iter<T>;
+	private current: Iter<T>;
+
+	constructor(one: Iter<T>, two: Iter<T>) {
+		super();
+
+		this.one = this.current = one;
+		this.two = two;
+	}
+
+	next(): T {
+		return this.current.next() || (this.current = this.two).next();
+	}
+
+	copy(): ChainIter<T> {
+		var copy = new ChainIter<T>(this.one.copy(), this.two.copy());
+		copy.current = (this.current === this.one) ? copy.one : copy.two;
+		return copy;
+	}
+}
+
+class UniqueIter<T> extends IterBase<T> {
+	private it: Iter<T>;
+	private seen: T[];
+
+	constructor(it: Iter<T>, seen: T[] = []) {
+		super();
+
+		this.it = it;
+		this.seen = seen;
+	}
+
+	next(): T {
+		var obj: T;
+		while ((obj = this.it.next()) && this.seen.indexOf(obj) !== -1);
+		if (obj)
+			this.seen.push(obj);
+		return obj;
+	}
+
+	copy(): UniqueIter<T> {
+		return new UniqueIter<T>(this.it.copy(), this.seen.slice(0));
+	}
 }

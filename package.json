@@ -8,7 +8,7 @@
 		"npm": "1.1.x"
 	},
 	"devDependencies": {
-		"typescript": "0.8.x",
+		"typescript": "0.9.0-1",
 		"ntspm": "git://github.com/oliverzheng/ntspm",
 		"nodeunit": "0.7.x",
 		"jscoverage": "0.3.6"

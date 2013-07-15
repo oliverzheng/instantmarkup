@@ -79,13 +79,13 @@ export function testHasUniqueIds(test) {
 		id: '4'
 	}];
 
-	test.equal(tree.hasUniqueIds(gen.arrayToIter(boxes)), true);
+	test.equal(tree.hasUniqueIds(gen.fromArray(boxes)), true);
 
 	boxes[1].id = '3';
-	test.equal(tree.hasUniqueIds(gen.arrayToIter(boxes)), false);
+	test.equal(tree.hasUniqueIds(gen.fromArray(boxes)), false);
 
 	boxes[1].id = null;
-	test.equal(tree.hasUniqueIds(gen.arrayToIter(boxes)), false);
+	test.equal(tree.hasUniqueIds(gen.fromArray(boxes)), false);
 
 	test.done();
 }

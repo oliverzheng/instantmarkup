@@ -12,6 +12,11 @@ export function sortNumbers(numbers: number[]) {
 	});
 }
 
+var genIdCounter = 0;
+export function genId(): string {
+	return 'gen' + (genIdCounter++);
+}
+
 export function layerToBox(rootLayer: extinf.Layer): inf.Box {
 	var root: inf.Box = {
 		id: rootLayer.id,

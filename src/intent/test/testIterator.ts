@@ -14,7 +14,7 @@ var boxes: inf.Box[] = [{
 }];
 
 export function testToArray(test) {
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
 	var array = it.toArray();
 
 	testutil.equals(test, boxes, array);
@@ -23,17 +23,17 @@ export function testToArray(test) {
 }
 
 export function testFirst(test) {
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
 	var box = it.first();
 	test.strictEqual(box.id, '0');
 
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
 	var box = it.first((box) => {
 		return box.id === '2';
 	});
 	test.strictEqual(box.id, '2');
 
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
 	var box = it.first((box) => {
 		return false;
 	});
@@ -43,7 +43,7 @@ export function testFirst(test) {
 }
 
 export function testForEach(test) {
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
 	var count = 0;
 	it.forEach((box: inf.Box, i: number) => {
 		count++;
@@ -55,7 +55,8 @@ export function testForEach(test) {
 }
 
 export function testFilter(test) {
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
+	debugger;
 	var it2 = it.filter((box: inf.Box) => {
 		return box.id === '0' || box.id === '2';
 	});
@@ -69,13 +70,13 @@ export function testFilter(test) {
 }
 
 export function testAny(test) {
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
 	var a = it.any((box) => {
 		return box.id === '0'
 	});
 	test.strictEqual(a, true);
 
-	var it = gen.arrayToIter(boxes);
+	var it = gen.fromArray(boxes);
 	var a = it.any((box) => {
 		return box.id === '5';
 	});
@@ -85,17 +86,17 @@ export function testAny(test) {
 }
 
 export function testTake(test) {
-	var it = gen.arrayToIter(boxes).take(0);
+	var it = gen.fromArray(boxes).take(0);
 	test.strictEqual(it.toArray().length, 0);
 
-	var it = gen.arrayToIter(boxes).take(2);
+	var it = gen.fromArray(boxes).take(2);
 	var ids = it.toArray().map((box) => {
 		return box.id;
 	});
 	var expected = ['0', '1'];
 	testutil.equals(test, expected, ids);
 
-	var it = gen.arrayToIter(boxes).take(5);
+	var it = gen.fromArray(boxes).take(5);
 	var ids = it.toArray().map((box) => {
 		return box.id;
 	});
@@ -106,7 +107,7 @@ export function testTake(test) {
 }
 
 export function testTakeWhile(test) {
-	var it = gen.arrayToIter(boxes).takeWhile((box) => {
+	var it = gen.fromArray(boxes).takeWhile((box) => {
 		return box.id !== '2';
 	});
 	var ids = it.toArray().map((box) => {
@@ -115,12 +116,12 @@ export function testTakeWhile(test) {
 	var expected = ['0', '1'];
 	testutil.equals(test, expected, ids);
 
-	var it = gen.arrayToIter(boxes).takeWhile((box) => {
+	var it = gen.fromArray(boxes).takeWhile((box) => {
 		return false;
 	});
 	test.strictEqual(it.toArray().length, 0);
 
-	var it = gen.arrayToIter(boxes).takeWhile((box) => {
+	var it = gen.fromArray(boxes).takeWhile((box) => {
 		return true;
 	});
 	var ids = it.toArray().map((box) => {
@@ -133,28 +134,28 @@ export function testTakeWhile(test) {
 }
 
 export function testDrop(test) {
-	var it = gen.arrayToIter(boxes).drop(0);
+	var it = gen.fromArray(boxes).drop(0);
 	var ids = it.toArray().map((box) => {
 		return box.id;
 	});
 	var expected = ['0', '1', '2'];
 	testutil.equals(test, expected, ids);
 
-	var it = gen.arrayToIter(boxes).drop(1);
+	var it = gen.fromArray(boxes).drop(1);
 	var ids = it.toArray().map((box) => {
 		return box.id;
 	});
 	var expected = ['1', '2'];
 	testutil.equals(test, expected, ids);
 
-	var it = gen.arrayToIter(boxes).drop(5);
+	var it = gen.fromArray(boxes).drop(5);
 	test.strictEqual(it.toArray().length, 0);
 
 	test.done();
 }
 
 export function testDropWhile(test) {
-	var it = gen.arrayToIter(boxes).dropWhile((box) => {
+	var it = gen.fromArray(boxes).dropWhile((box) => {
 		return box.id !== '1';
 	});
 	var ids = it.toArray().map((box) => {
@@ -163,7 +164,7 @@ export function testDropWhile(test) {
 	var expected = ['1', '2'];
 	testutil.equals(test, expected, ids);
 
-	var it = gen.arrayToIter(boxes).dropWhile((box) => {
+	var it = gen.fromArray(boxes).dropWhile((box) => {
 		return false;
 	});
 	var ids = it.toArray().map((box) => {
@@ -172,7 +173,7 @@ export function testDropWhile(test) {
 	var expected = ['0', '1', '2'];
 	testutil.equals(test, expected, ids);
 
-	var it = gen.arrayToIter(boxes).dropWhile((box) => {
+	var it = gen.fromArray(boxes).dropWhile((box) => {
 		return true;
 	});
 	test.strictEqual(it.toArray().length, 0);

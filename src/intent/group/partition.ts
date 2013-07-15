@@ -114,7 +114,7 @@ export class Ranges {
 /**
  * A list of rects within a bounding rect.
  */
-export export class Rects {
+export class Rects {
 	bound: inf.Rect;
 	rects: inf.Rect[];
 
@@ -262,7 +262,7 @@ export function partitionChildren(layout: l.Layout, box: inf.Box,
 		}
 		var rectBetween = util.getRectBetween(prevRect, rect);
 		var it = search.findWithin(layout, rectBetween,
-								   gen.arrayToIter(box.children));
+								   gen.fromArray(box.children));
 
 		var g = op.groupChildren(layout, it.toArray(),
 								 idPrefix + '-partition-' + i);

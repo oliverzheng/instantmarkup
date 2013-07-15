@@ -13,12 +13,12 @@ export function setUp(cb) {
 		direction: inf.Direction.HORIZONTAL,
 		children: [{
 			id: 'child1',
-			w: inf.px(50),
-			h: inf.px(50),
+			w: inf.px(20),
+			h: inf.px(20),
 		}, {
 			id: 'child2',
-			w: inf.px(50),
-			h: inf.px(50),
+			w: inf.px(20),
+			h: inf.px(20),
 		}, {
 			id: 'child3',
 			w: inf.px(20),
@@ -50,7 +50,7 @@ export function testNoDirection(test) {
 }
 
 export function testMoveChildren(test) {
-	this.root.children[0].w = inf.px(49);
+	this.root.children[0].w = inf.px(19);
 	test.strictEqual(this.snapshot.equalsLayout(this.layout), false);
 	test.done();
 }

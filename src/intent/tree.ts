@@ -46,7 +46,7 @@ export function hasUniqueIds(it: iter.BoxIter): bool {
 	var ids: { [id: string]: bool; } = {};
 
 	var box: inf.Box;
-	while ((box = it()) && box.id != null && !ids[box.id])
+	while ((box = it.next()) && box.id != null && !ids[box.id])
 		ids[box.id] = true;
 
 	return box == null;
@@ -79,7 +79,7 @@ export function getHeight(box: inf.Box): number {
 /**
  * Get the nth ancestor of a box. The 0th ancestor of a box is itself.
  */
-export function getAncestor(box: inf.Box, degree?: number = 1): inf.Box {
+export function getAncestor(box: inf.Box, degree: number = 1): inf.Box {
 	while (box && degree-- > 0)
 		box = box.parent;
 
