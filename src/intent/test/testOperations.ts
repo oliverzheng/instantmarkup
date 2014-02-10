@@ -151,4 +151,129 @@ export var group = {
 
 		test.done();
 	},
+
+	/*
+	testReparentSame: function(test) {
+		var structure = testUtil.getStructure(this.root);
+
+		test.strictEqual(op.reparent(this.layout,
+									 this.child1, this.parent1, 'prefix'),
+						 this.parent1);
+		testUtil.equals(test, structure, testUtil.getStructure(this.root));
+
+		test.done();
+	},
+
+	testReparentBefore1: function(test) {
+		test.strictEqual(op.reparent(this.layout,
+									 this.child1, this.root, 'prefix'),
+						 this.parent1);
+		testUtil.equals(test, testUtil.getStructure(this.root), {
+			'root': <any[]>[ // Wow #thisIsUgly.
+				'child1',
+				'parent1',
+				{parent2: [
+					'child2'
+				]}
+			]
+		});
+
+		test.done();
+	},
+
+	testReparentBefore2: function(test) {
+		test.strictEqual(op.reparent(this.layout,
+									 this.child1, this.parent2, 'prefix'),
+						 this.parent1);
+		testUtil.equals(test, testUtil.getStructure(this.root), {
+			'root': <any[]>[
+				'parent1',
+				{parent2: [
+					'child1',
+					'child2'
+				]}
+			]
+		});
+
+		test.done();
+	},
+
+	testReparentBefore3: function(test) {
+		test.strictEqual(op.reparent(this.layout,
+									 this.parent1, this.parent2, 'prefix'),
+						 this.root);
+		testUtil.equals(test, testUtil.getStructure(this.root), {
+			'root': [
+				{parent2: <any[]>[
+					{'parent1': [
+						'child1',
+					]},
+					'child2'
+				]}
+			]
+		});
+
+		test.done();
+	},
+
+	testReparentBefore4: function(test) {
+		test.strictEqual(op.reparent(this.layout,
+									 this.child2, this.root, 'prefix'),
+						 this.parent2);
+		testUtil.equals(test, testUtil.getStructure(this.root), {
+			'root': <any[]>[
+				{'parent1': [
+					'child1',
+				]},
+				'child2',
+				'parent2'
+			]
+		});
+
+		test.done();
+	},
+
+	testReparentBefore5: function(test) {
+		test.strictEqual(op.reparent(this.layout,
+									 this.child1, this.child2, 'prefix'),
+						 this.parent1);
+		testUtil.equals(test, testUtil.getStructure(this.root), {
+			'root': <any[]>[
+				'parent1',
+				{'parent2': [
+					{'child2': [
+						'child1'
+					]}
+				]},
+			]
+		});
+
+		test.done();
+	},
+
+	testReparentAfter: function(test) {
+		test.strictEqual(op.reparent(this.layout,
+									 this.child2, this.parent1, 'prefix'),
+						 this.parent2);
+		testUtil.equals(test, testUtil.getStructure(this.root), {
+			'root': <any[]>[
+				{'parent1': [
+					'child1',
+					'child2',
+				]},
+				'parent2',
+			]
+		});
+
+		test.done();
+	},
+
+	testReparentOwnChild: function(test) {
+		test.throws(() => {
+			op.reparent(this.layout, this.parent1, this.child1, 'prefix');
+		});
+
+		test.done();
+	},
+	*/
 };

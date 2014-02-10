@@ -118,3 +118,20 @@ export function isBefore(first: inf.Box, second: inf.Box): bool {
 
 	return indexOfChild(first) < indexOfChild(second);
 }
+
+/**
+ * If box were to be inserted into the list of boxes so that the result is
+ * sorted by depth first order, what should the insertion index be?
+ *
+ * boxes must already be sorted.
+ */
+export function depthFirstInsertionIndex(box: inf.Box, boxes: inf.Box[]): number {
+	return 0;
+}
+
+/**
+ * Return a list of boxes in the tree's depth first order.
+ */
+export function sortByDepthFirst(boxes: inf.Box[]): inf.Box[] {
+	return [];
+}

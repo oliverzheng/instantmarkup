@@ -144,3 +144,20 @@ export function reverseDepthFirst(root: inf.Box,
 								  start: inf.Box = null): ReverseDepthFirst {
 	return new ReverseDepthFirst(root, start);
 }
+
+export class Counter extends iter.IterBase<number> {
+	private nextNumber: number;
+
+	constructor(start: number = 0) {
+		super();
+		this.nextNumber = start;
+	}
+
+	next(): number {
+		return this.nextNumber++;
+	}
+
+	copy(): Counter {
+		return new Counter(this.nextNumber);
+	}
+}

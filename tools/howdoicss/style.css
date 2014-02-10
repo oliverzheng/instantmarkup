@@ -1,0 +1,23 @@
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+.preview-root {
+	position: absolute;
+	left: 220px;
+}
+.preview-box {
+	position: absolute;
+	border: 1px solid #CCC;
+	cursor: pointer;
+}
+.preview-box--hovered {
+	border-color: #999;
+}
+.preview-box--selected {
+	border-color: #FCC !important;
+}
+.preview-box--selected.preview-box--hovered {
+	border-color: #F99 !important;
+}

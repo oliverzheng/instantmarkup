@@ -159,6 +159,9 @@ export interface Box {
 	/** Id of the extracted layer. */
 	layerId?: string;
 
+	/** Human readable name */
+	name?: string;
+
 	parent?: Box;
 
 	/** Bounding box of this collateral. */

@@ -27,9 +27,8 @@ export function testLayerToBox(test) {
 
 	var box = util.layerToBox(layer);
 	test.strictEqual(box.id, 'root');
-	test.strictEqual(box.children.length, 2);
+	test.strictEqual(box.children.length, 1);
 	test.strictEqual(box.children[0].id, 'child');
-	test.strictEqual(box.children[1].id, 'root');
 
 	test.done();
 }

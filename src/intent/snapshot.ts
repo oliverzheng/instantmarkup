@@ -1,7 +1,5 @@
 /// <reference path="../../_typings.d.ts" />
 
-var coll = require('coll');
-
 import _ = module('underscore');
 
 import inf = module('./interfaces');

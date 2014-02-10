@@ -5,6 +5,7 @@ import _ = module('underscore');
 import inf = module('../interfaces');
 import l = module('../layout');
 import search = module('../search');
+import iter = module('../iterator');
 import gen = module('../generator');
 import util = module('../util');
 import tree = module('../tree');
@@ -36,6 +37,73 @@ function isContainedBy(layout: l.Layout, box: inf.Box, parent: inf.Box): bool {
 		return true;
 
 	return false;
+}
+
+export class ContainBoxes extends iter.IterBase<inf.Box> {
+	private layout: l.Layout;
+	private idPrefix: string;
+	private counter: gen.Counter;
+	private boxesToProcess: inf.Box[];
+
+	constructor(layout: l.Layout, idPrefix: string) {
+		super();
+		this.layout = layout;
+		this.idPrefix = idPrefix;
+		this.counter = new gen.Counter();
+		this.boxesToProcess = gen.depthFirst(layout.root).toArray();
+	}
+
+	next(): inf.Box {
+		while (this.boxesToProcess.length > 0) {
+			var box = this.boxesToProcess.shift();
+			var boxRect = this.layout.getRect(box);
+
+			/* We only want boxes that don't overlap anything. */
+			if (search.findOverlap(this.layout, boxRect).not(box).any())
+				continue;
+
+			function isntDescendant(target: inf.Box): bool {
+				return !tree.isAncestor(box, target);
+			}
+
+			var boxesBelowIt = gen.depthFirst(this.layout.root, box).
+									// Don't want box itself
+									drop(1).
+									// Don't want children of box
+									filter(isntDescendant);
+
+			/* We don't want the smallest box. We want the closest box in z-order.
+			 * Otherwise, we could reparent with an incorrect z-order. */
+			var parentBelow = search.findContainer(this.layout, boxRect,
+												   boxesBelowIt).first();
+			var boxesAboveIt = gen.reverseDepthFirst(this.layout.root, box).
+									drop(1).
+									filter(isntDescendant);
+			var parentAbove = search.findContainer(this.layout, boxRect,
+												   boxesAboveIt).first();
+
+			var parent: inf.Box = parentBelow || parentAbove;
+
+			/* No parents found? Okay.jpg */
+			if (!parent)
+				continue;
+
+			/* Presumably, if parentAbove exists, it's transparent and box is
+			 * visible. Use the parent that's smaller. */
+			if (parentBelow && parentAbove &&
+				util.rectArea(this.layout.getRect(parentAbove)) <
+					util.rectArea(this.layout.getRect(parentBelow)))
+				parent = parentAbove;
+
+			if (isContainedBy(this.layout, box, parent))
+				continue;
+
+			var created = op.reparent(this.layout, box, parent,
+									  this.idPrefix + this.counter.next());
+
+			return box;
+		}
+	}
 }
 
 /**

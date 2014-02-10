@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			html, body {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="jquery.min.js"></script>
+		<script src="knockout.debug.js"></script>
+		<script src="require.js"></script>
+		<script src="underscore.js"></script>
+
+		<script>
+			ko.bindingHandlers.recursiveHover = {
+				init: function(el, valueAccessor) {
+					var params = valueAccessor();
+					var parentSel = params.parentSel;
+					var $el = $(el);
+					var hovered = params.hovered;
+
+					function onEnter() {
+						$el.addClass('js-hovered');
+						if (parentSel)
+							$el.parents(parentSel).addClass('js-nohover');
+					}
+					function onExit() {
+						$el.removeClass('js-hovered');
+						if (parentSel)
+							$el.parents(parentSel).removeClass('js-nohover');
+					}
+
+					$el.hover(function() {
+						hovered(true);
+					}, function() {
+						hovered(false);
+					});
+					hovered.subscribe(function(status) {
+						if (status)
+							onEnter();
+						else
+							onExit();
+					});
+				}
+			};
+
+			ko.bindingHandlers.selected = {
+				init: function(el, valueAccessor) {
+					var selected = valueAccessor();
+					ko.bindingHandlers.click.init(el, function() {
+						return function() {
+							selected(!selected());
+						};
+					}, function() {
+						return {
+							clickBubble: false
+						};
+					});
+				}
+			};
+		</script>
+
+		<style>
+			.boxes {
+				position: absolute;
+				left: 220px;
+			}
+			.box {
+				position: absolute;
+			}
+			.box-children, .box-selection, .box-description {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+			.box-children {
+				z-index: 2;
+			}
+			.box-selection {
+				background: rgba(255,255,255,0.2);
+				opacity: 0;
+				z-index: 1;
+				border: 1px solid white;
+			}
+			.box-description {
+				z-index: 0;
+			}
+			.box.js-hovered:not(.js-nohover) {
+				cursor: pointer;
+			}
+			.box.js-hovered:not(.js-nohover) > .box-selection {
+				opacity: 1;
+			}
+			.box-selected > .box-selection {
+				background: rgba(200, 255, 200, 0.2);
+				opacity: 1;
+			}
+		</style>
+		<script type="text/html" id="boxTemplate">
+			<div data-bind="style: {
+								left: rect.x + 'px',
+								top: rect.y + 'px',
+								width: rect.w + 'px',
+								height: rect.h + 'px',
+								'z-index': zIndex
+							},
+							recursiveHover: {
+								parentSel: '.box',
+								hovered: hovered
+							},
+							css: {
+								box: true,
+								'box-selected': selected
+							},
+							attr: {
+								'id': 'box-' + box.id,
+							},
+							selected: selected">
+				<div data-bind="template: {
+									name: 'boxTemplate',
+									foreach: children
+								}" class="box-children"></div>
+
+				<div class="box-selection"></div>
+
+				<div data-bind="style: {
+									'background-image': bgImage
+								}" class="box-description"></div>
+			</div>
+		</script>
+
+		<style>
+			.hierarchy {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 200px;
+				border: 1px solid #AAA;
+				padding: 7px;
+				font-family: Helvetica Neue;
+				font-weight: 300;
+				font-size: 14px;
+				line-height: 24px;
+				overflow: auto;
+				box-sizing: border-box;
+			}
+			.hierarchy-box {
+				width: 100%;
+			}
+			.hierarchy-description {
+				padding-left: 4px;
+				border: 1px solid #DDD;
+				border-top: 0;
+			}
+			.hierarchy-description.js-hovered {
+				background-color: rgba(0,0,0,0.03);
+				cursor: pointer;
+			}
+			.hierarchy-children {
+				border-left: 10px solid transparent;
+			}
+			.hierarchy-description.hierarchy-selected {
+				background-color: rgba(0,150,0,0.1) !important;
+			}
+		</style>
+
+		<script type="text/html" id="hierarchyTemplate">
+			<div class="hierarchy-box">
+				<div data-bind="text: name,
+								recursiveHover: {
+									parentSel: '.hierarchy-box',
+									hovered: hovered
+								},
+								selected: selected,
+								css: {
+									'hierarchy-description': true,
+									'hierarchy-selected': selected
+								}"></div>
+				<div data-bind="template: {
+									name: 'hierarchyTemplate',
+									foreach: children
+								}" class="hierarchy-children"></div>
+			</div>
+		</script>
+
+		<style>
+			.wrap {
+				border-top: 30px solid transparent;
+				position: relative;
+			}
+		</style>
+		<div class="wrap">
+			<div data-bind="template: {
+								name: 'hierarchyTemplate',
+								data: root
+							}, style: {
+								height: root.rect.h + 'px'
+							}" class="hierarchy"></div>
+
+			<div data-bind="template: { name: 'boxTemplate', data: root }"
+							class="boxes"></div>
+		</div>
+
+		<style>
+			.controls {
+				position: absolute;
+				top: 0;
+			}
+			.controls .content {
+				border-bottom: 1px solid #CCC;
+				position: fixed;
+				background-color: rgba(255, 255, 255, 0.4);
+				line-height: 30px;
+			}
+			.controls, .controls .content {
+				width: 100%;
+				height: 30px;
+			}
+			.controls .control {
+				padding: 0 10px;
+				color: #666;
+				text-decoration: none;
+			}
+			.controls .control.actionable {
+				cursor: pointer;
+			}
+			.controls .control:hover {
+				color: #000;
+			}
+		</style>
+		<script type="text/html" id="controlsTemplate">
+			<div class="content" data-bind="foreach: $data">
+				<a class="control" data-bind="click: next, css: { control: true, actionable: !stopped() }" href="#">
+					<span data-bind="if: !stopped()">&#9658</span>
+					<span data-bind="if: stopped()">&#9608</span>
+					<span data-bind="text: name"></span>
+					<span data-bind="if: status()">-</span>
+					<span data-bind="text: status()"></span>
+				</a>
+			</div>
+		</script>
+		<div data-bind="template: { name: 'controlsTemplate', data: controls }" class="controls"></div>
+
+		<script>
+			require.config({
+			  shim: {
+				underscore: {
+				  exports: '_'
+				},
+			  }
+			});
+
+			function renderDisplayed(json, controls) {
+				var page = {
+					root: json,
+					controls: controls
+				};
+				(function applyStates(json, i) {
+					json.hovered = ko.observable(false);
+					json.selected = ko.observable(false);
+					json.children.forEach(applyStates);
+					json.zIndex = -i;
+					json.bgImage = '';
+					/*
+					if (json.preview)
+						json.bgImage = 'url("/tmp/derp/' + json.preview + '")';
+						*/
+				})(json);
+
+				page.root.bgImage = 'url("/tmp/derp/rendered.png")';
+
+				ko.applyBindings(page);
+			}
+
+			function libs() {
+				var args = Array.prototype.slice.call( arguments, 0 );
+				return args.map(function(arg) {
+					return '../../bin/web/intent/' + arg;
+				});
+			}
+			var before = {};
+			function toDisplay(layout, box) {
+				if (!box)
+					box = layout.root;
+				var ret = {
+				};
+				ret.rect = layout.getRect(box);
+				ret.name = box.name;
+				ret.children = [];
+				if (box.children)
+					ret.children = box.children.map(function(child) {
+						return toDisplay(layout, child);
+					});
+				ret.box = box;
+				return ret;
+			}
+			$.getJSON('/tmp/derp/root.json', function(json) {
+				require(
+					libs('util', 'layout', 'group/containment', 'snapshot', 'generator'),
+					function(intentUtil, l, containment, ss, gen) {
+						var root = intentUtil.boxFromJSON(json);
+						var layout = new l.Layout(root);
+
+						//var s1 = new ss.Snapshot(layout);
+						//var diff = s1.diff(new ss.Snapshot(layout)).toArray();
+
+						var load = toDisplay(layout);
+						load.preview = 'render.png';
+						load.name = 'root';
+
+
+						var it = new containment.ContainBoxes(layout, 'prefix');
+						var contain = {
+							name: 'contain',
+							it: it,
+							stopped: ko.observable(false),
+							status: ko.observable(''),
+							counter: new gen.Counter(),
+							next: function() {
+								if (!contain.stopped()) {
+									var box = it.next();
+									if (box) {
+										contain.status(contain.counter.next() + ': ' + box.id + ' (' + box.name + ')');
+									} else {
+										contain.stopped(true);
+									}
+								}
+							}
+						};
+						var controls = [contain];
+						renderDisplayed(load, controls);
+					});
+			}).fail(function() {
+				console.log('Failed to load json');
+			});
+		</script>
+	</body>
+</html>

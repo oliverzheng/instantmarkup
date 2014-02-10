@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<style>
+			.tree {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 200px;
+				border: 1px solid #AAA;
+				padding: 7px;
+				font-family: Helvetica Neue;
+				font-weight: 300;
+				font-size: 14px;
+				line-height: 24px;
+				overflow: auto;
+				box-sizing: border-box;
+			}
+			.tree-box {
+				width: 100%;
+			}
+			.tree-description {
+				padding-left: 4px;
+				border: 1px solid #DDD;
+				border-top: 0;
+			}
+			.tree-description.js-hovered {
+				background-color: rgba(0,0,0,0.03);
+				cursor: pointer;
+			}
+			.tree-children {
+				border-left: 10px solid transparent;
+			}
+			.tree-description.tree-selected {
+				background-color: rgba(0,150,0,0.1) !important;
+			}
+		</style>
+
+		<div id="root"></div>
+
+		<script src="jquery.min.js"></script>
+		<script src="knockout.debug.js"></script>
+		<script src="underscore.js"></script>
+		<script src="react.js"></script>
+		<script src="JSXTransformer.js"></script>
+		<script src="require.js"></script>
+		<script>
+			require.config({
+			  paths: {
+				  jquery: 'jquery.min',
+			  },
+			  shim: {
+				underscore: {
+				  exports: '_'
+				},
+				React: {
+				  exports: 'React'
+				},
+			  }
+			});
+		</script>
+
+		<script type="text/jsx" src="render.jsx"></script>
+	</body>
+</html>

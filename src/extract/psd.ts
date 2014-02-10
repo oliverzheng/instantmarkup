@@ -1,10 +1,16 @@
 /// <reference path='../../_typings.d.ts' />
 
 import path = module('path');
-import interfaces = module('./interfaces');
+import inf = module('./interfaces');
+var async = require('async');
+
 var psdjs = require('psd');
 
-function exportPsd(psd, name): interfaces.Layer {
+export interface PSDLayer extends inf.Layer {
+	psdLayer?: any;
+}
+
+function exportPsd(psd, name): PSDLayer {
 	var info = psd.toJSON();
 	return {
 		id: name,
@@ -17,13 +23,13 @@ function exportPsd(psd, name): interfaces.Layer {
 	};
 }
 
-function exportPsdLayers(psdLayers): interfaces.Layer[] {
-	var layers: interfaces.Layer[] = [];
+function exportPsdLayers(psdLayers): PSDLayer[] {
+	var layers: PSDLayer[] = [];
 	var endLoop = false;
 
 	while (psdLayers.length > 0 && !endLoop) {
 		var psdLayer = psdLayers.shift();
-		var layer: interfaces.Layer = null;
+		var layer: PSDLayer = null;
 
 		switch (psdLayer.layerType) {
 			case 'open folder':
@@ -61,7 +67,7 @@ function exportPsdLayers(psdLayers): interfaces.Layer[] {
 			default:
 				// Layer
 				layer = {
-					id: psdLayer.name,
+					id: psdLayer.layerId,
 					name: psdLayer.name,
 					bbox: {
 						x: psdLayer.left,
@@ -78,15 +84,67 @@ function exportPsdLayers(psdLayers): interfaces.Layer[] {
 				break;
 		}
 
-		if (layer)
+		if (layer) {
+			layer.psdLayer = psdLayer;
 			layers.push(layer);
+		}
 	}
 
 	return layers;
 }
 
-export function getLayers(filename: string): any {
+export function getLayers(filename: string): inf.Layer {
 	var psd = psdjs.PSD.fromFile(filename);
+	psd.setOptions({
+		layerImages: true,
+		onlyVisibleLayers: true,
+	});
 	psd.parse();
 	return exportPsd(psd, path.basename(filename));
+}
+
+export function getDesignFile(filename: string, outDir: string,
+							  getFilename: (id: string, name: string) => string,
+							  onComplete: any): inf.DesignFile {
+	var psd = psdjs.PSD.fromFile(filename);
+	psd.setOptions({
+		layerImages: true,
+		onlyVisibleLayers: true,
+	});
+	psd.parse();
+	var rootLayer = exportPsd(psd, path.basename(filename));
+	var bitmapFilenames: {[id: string]: string;} = {};
+
+	var rendered = 'rendered.png';
+	psd.toFileSync(outDir + '/' + rendered);
+
+	async.parallel(
+		psd.layers.filter(function(layer) {
+			return !layer.isFolder && !layer.isHidden;
+		}).map(function (layer) {
+			var filename = getFilename(layer.layerId, layer.name);
+			var callback = null;
+			var done = false;
+			layer.image.toFile(outDir + '/' + filename, function() {
+				bitmapFilenames[layer.layerId] = filename;
+				if (callback)
+					callback(null);
+				done = true;
+			});
+			return function(cb) {
+				if (done)
+					cb();
+				else
+					callback = cb;
+			};
+		}),
+		function(err, results) {
+			onComplete(bitmapFilenames);
+		}
+	);
+
+	return {
+		rootLayer: rootLayer,
+		bitmapFilenames: bitmapFilenames,
+	}
 }

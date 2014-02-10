@@ -25,11 +25,12 @@ export function layerToBox(rootLayer: extinf.Layer): inf.Box {
 		h: inf.px(rootLayer.bbox.h),
 	};
 
-	var layers = extutil.flattenLayers(rootLayer);
+	var layers = extutil.flattenLayers(rootLayer, false);
 	root.children = layers.map(function(layer): inf.Box {
 		return {
 			id: layer.id,
 			layerId: layer.id,
+			name: layer.name,
 			parent: root,
 			absolute: {
 				l: inf.px(layer.bbox.x),
@@ -41,6 +42,21 @@ export function layerToBox(rootLayer: extinf.Layer): inf.Box {
 	});
 
 	return root;
+}
+
+// TODO: Make a god damn copy function already.
+
+export function boxToJSON(box: inf.Box): inf.Box {
+	delete box.parent;
+	(box.children || []).forEach((child) => {
+		boxToJSON(child);
+	});
+	return box;
+}
+
+export function boxFromJSON(box: inf.Box): inf.Box {
+	tree.refreshParents(box);
+	return box;
 }
 
 /**

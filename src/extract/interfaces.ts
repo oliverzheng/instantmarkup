@@ -12,3 +12,8 @@ export interface Layer {
 	};
 	children?: Layer[];
 }
+
+export interface DesignFile {
+	rootLayer: Layer;
+	bitmapFilenames: { [id: string]: string; };
+}

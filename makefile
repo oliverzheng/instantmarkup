@@ -2,8 +2,13 @@ BIN_DIR=bin
 JS_DIR=$(BIN_DIR)/js
 JS_NODTS_DIR=$(BIN_DIR)/js-nodts
 JS_INST_DIR=$(BIN_DIR)/js-inst
+WEB_DIR=$(BIN_DIR)/web
 
-SOURCES=\
+#TSX=\
+#	src/tools/render.tsx \
+#JSX=$(TSX:.tsx=.jsx)
+
+TS=\
 	src/extract/interfaces.ts \
 	src/extract/psd.ts \
 	src/extract/util.ts \
@@ -33,6 +38,10 @@ SOURCES=\
 	src/testUtil.ts \
 	src/main.ts \
 
+
+#src/extract/test/testPsd.ts \
+#src/extract/test/testUtil.ts \
+
 CC=node_modules/.bin/tsc
 TEST=node_modules/.bin/nodeunit
 INST=node_modules/.bin/jscoverage
@@ -42,11 +51,20 @@ RUNTEST=$(TEST) $(shell find $(JS_DIR) -ipath '*/test/test*.js')
 build: deps $(JS_DIR)
 
 # There is no dependency detection yet. Each incremental build is a full build.
-$(JS_DIR): $(SOURCES) makefile
+$(JS_DIR): $(TS) makefile
 	@rm -rf $(JS_DIR)
 	@mkdir -p $(JS_DIR)
-	@echo -n Compiling...
-	@$(CC) --declaration --out $(JS_DIR) $(SOURCES)
+	@echo -n Compiling for node...
+	@$(CC) --declaration --out $(JS_DIR) $(TS)
+	@echo ' Done'
+
+web: $(WEB_DIR)
+
+$(WEB_DIR): $(TS) makefile
+	@rm -rf $(WEB_DIR)
+	@mkdir -p $(WEB_DIR)
+	@echo -n Compiling for web...
+	@$(CC) --module amd --out $(WEB_DIR) $(TS)
 	@echo ' Done'
 
 test: build
@@ -87,4 +105,4 @@ clean:
 cleanall: clean
 	rm -rf _typings.d.ts typings node_modules
 
-.PHONY: build test debug instrument coverage precheckin deps clean cleanall
+.PHONY: build web test debug instrument coverage precheckin deps clean cleanall
